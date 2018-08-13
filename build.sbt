@@ -55,7 +55,9 @@ lazy val core = project.in(file("core"))
   ),
   // Use correct version for scala package imports
   OsgiKeys.importPackage := Seq(osgiImport("scala*", scalaVersion.value), "*"),
-  mimaPreviousVersion := None
+  mimaPreviousVersion := None,
+  resolvers += "scala-integration" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
+  scalaVersion := "2.13.0-pre-d08e53f"
 )
 
 lazy val junit = project.in(file("junit"))
