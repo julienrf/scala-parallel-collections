@@ -13,13 +13,13 @@
 package scala
 package collection.parallel
 
-import scala.collection.generic.GenericCompanion
+//import scala.collection.generic.GenericCompanion
 import scala.collection.generic.GenericParCompanion
 import scala.collection.generic.GenericParTemplate
 import scala.collection.generic.ParFactory
-import scala.collection.generic.CanCombineFrom
-import scala.collection.GenSeq
-import scala.collection.parallel.mutable.ParArrayCombiner
+//import scala.collection.generic.CanCombineFrom
+//import scala.collection.GenSeq
+//import scala.collection.parallel.mutable.ParArrayCombiner
 
 /** A template trait for parallel sequences.
  *
@@ -31,12 +31,12 @@ import scala.collection.parallel.mutable.ParArrayCombiner
  *
  *  @author Aleksandar Prokopec
  */
-trait ParSeq[+T] extends GenSeq[T]
-                    with ParIterable[T]
+trait ParSeq[+T] extends /*GenSeq[T]
+                    with*/ ParIterable[T]
                     with GenericParTemplate[T, ParSeq]
-                    with ParSeqLike[T, ParSeq[T], Seq[T]]
+                    with ParIterableLike[T, ParSeq, ParSeq[T], Seq[T]]
 {
-  override def companion: GenericCompanion[ParSeq] with GenericParCompanion[ParSeq] = ParSeq
+  override def companion: /*GenericCompanion[ParSeq] with*/ GenericParCompanion[ParSeq] = ParSeq
   //protected[this] override def newBuilder = ParSeq.newBuilder[T]
 
   def apply(i: Int): T
@@ -44,11 +44,15 @@ trait ParSeq[+T] extends GenSeq[T]
   override def toString = super[ParIterable].toString
 
   override def stringPrefix = getClass.getSimpleName
+
+  // TODO remove these definitions inlined from ParSeqLike
+  final def size: Int = length
+  def length: Int
 }
 
 object ParSeq extends ParFactory[ParSeq] {
-  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParSeq[T]] = new GenericCanCombineFrom[T]
+//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParSeq[T]] = new GenericCanCombineFrom[T]
 
-  def newBuilder[T]: Combiner[T, ParSeq[T]] = ParArrayCombiner[T]
-  def newCombiner[T]: Combiner[T, ParSeq[T]] = ParArrayCombiner[T]
+  def newBuilder[T]: Combiner[T, ParSeq[T]] = immutable.ParVector.newBuilder /*ParArrayCombiner[T]*/
+  def newCombiner[T]: Combiner[T, ParSeq[T]] = immutable.ParVector.newCombiner /*ParArrayCombiner[T]*/
 }

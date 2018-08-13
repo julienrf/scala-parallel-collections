@@ -16,7 +16,7 @@ package generic
 
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.ParIterable
-import scala.collection.parallel.ParMap
+//import scala.collection.parallel.ParMap
 
 import scala.annotation.unchecked.uncheckedVariance
 import scala.language.higherKinds
@@ -29,10 +29,10 @@ import scala.language.higherKinds
  *  @since 2.8
  */
 trait GenericParTemplate[+A, +CC[X] <: ParIterable[X]]
-extends GenericTraversableTemplate[A, CC]
-   with HasNewCombiner[A, CC[A] @uncheckedVariance]
+  extends GenericTraversableTemplate[A, CC]
+    with HasNewCombiner[A, CC[A] @uncheckedVariance]
 {
-  def companion: GenericCompanion[CC] with GenericParCompanion[CC]
+  def companion: /*GenericCompanion[CC] with*/ GenericParCompanion[CC]
 
   protected[this] override def newBuilder: scala.collection.mutable.Builder[A, CC[A]] = newCombiner
 
@@ -51,18 +51,18 @@ extends GenericTraversableTemplate[A, CC]
 }
 
 
-trait GenericParMapTemplate[K, +V, +CC[X, Y] <: ParMap[X, Y]] extends GenericParTemplate[(K, V), ParIterable]
-{
-  protected[this] override def newCombiner: Combiner[(K, V), CC[K, V]] = {
-    val cb = mapCompanion.newCombiner[K, V]
-    cb
-  }
-
-  def mapCompanion: GenericParMapCompanion[CC]
-
-  def genericMapCombiner[P, Q]: Combiner[(P, Q), CC[P, Q]] = {
-    val cb = mapCompanion.newCombiner[P, Q]
-    cb
-  }
-}
+//trait GenericParMapTemplate[K, +V, +CC[X, Y] <: ParMap[X, Y]] extends GenericParTemplate[(K, V), ParIterable]
+//{
+//  protected[this] override def newCombiner: Combiner[(K, V), CC[K, V]] = {
+//    val cb = mapCompanion.newCombiner[K, V]
+//    cb
+//  }
+//
+//  def mapCompanion: GenericParMapCompanion[CC]
+//
+//  def genericMapCombiner[P, Q]: Combiner[(P, Q), CC[P, Q]] = {
+//    val cb = mapCompanion.newCombiner[P, Q]
+//    cb
+//  }
+//}
 

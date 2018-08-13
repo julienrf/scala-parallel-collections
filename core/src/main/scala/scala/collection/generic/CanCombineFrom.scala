@@ -24,8 +24,13 @@ import scala.collection.parallel._
  *  @tparam To    the type of the collection to be created.
  *  @since 2.8
  */
-trait CanCombineFrom[-From, -Elem, +To] extends CanBuildFrom[From, Elem, To] with Parallel {
+trait CanCombineFrom[-From, -Elem, +To] extends OldCanBuildFrom[From, Elem, To] with Parallel {
   def apply(from: From): Combiner[Elem, To]
   def apply(): Combiner[Elem, To]
 }
 
+// TODO Remove
+trait OldCanBuildFrom[-From, -Elem, +To] {
+  def apply(from: From): collection.mutable.Builder[Elem, To]
+  def apply(): collection.mutable.Builder[Elem, To]
+}

@@ -14,8 +14,8 @@ package scala
 package collection
 package parallel.immutable
 
-import scala.collection.generic.{GenericParTemplate, CanCombineFrom, ParFactory}
-import scala.collection.parallel.ParSeqLike
+import scala.collection.generic.{GenericParTemplate, /*CanCombineFrom,*/ ParFactory}
+//import scala.collection.parallel.ParSeqLike
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.SeqSplitter
 import mutable.ArrayBuffer
@@ -40,9 +40,10 @@ import immutable.VectorIterator
  *  @define coll immutable parallel vector
  */
 class ParVector[+T](private[this] val vector: Vector[T])
-extends ParSeq[T]
+extends scala.collection.parallel.ParSeq[T]
    with GenericParTemplate[T, ParVector]
-   with ParSeqLike[T, ParVector[T], Vector[T]]
+   with scala.collection.parallel.ParIterableLike[T, ParVector, ParVector[T], Vector[T]]
+   /*with ParSeqLike[T, ParVector[T], Vector[T]]*/
    with Serializable
 {
   override def companion = ParVector
@@ -61,24 +62,24 @@ extends ParSeq[T]
 
   override def seq: Vector[T] = vector
 
-  override def toVector: Vector[T] = vector
+  /*override*/ def toVector: Vector[T] = vector
 
   class ParVectorIterator(_start: Int, _end: Int) extends VectorIterator[T](_start, _end) with SeqSplitter[T] {
     def remaining: Int = remainingElementCount
     def dup: SeqSplitter[T] = (new ParVector(remainingVector)).splitter
-    def split: Seq[ParVectorIterator] = {
+    def split: scala.collection.immutable.Seq[ParVectorIterator] = {
       val rem = remaining
       if (rem >= 2) psplit(rem / 2, rem - rem / 2)
-      else Seq(this)
+      else scala.collection.immutable.Seq(this)
     }
-    def psplit(sizes: Int*): Seq[ParVectorIterator] = {
+    def psplit(sizes: Int*): scala.Seq[ParVectorIterator] = {
       var remvector = remainingVector
-      val splitted = new ArrayBuffer[Vector[T]]
+      val splitted = List.newBuilder[Vector[T]]
       for (sz <- sizes) {
         splitted += remvector.take(sz)
         remvector = remvector.drop(sz)
       }
-      splitted.map(v => new ParVector(v).splitter.asInstanceOf[ParVectorIterator])
+      splitted.result().map(v => new ParVector(v).splitter.asInstanceOf[ParVectorIterator])
     }
   }
 }
@@ -88,8 +89,8 @@ extends ParSeq[T]
  *  @define coll immutable parallel vector
  */
 object ParVector extends ParFactory[ParVector] {
-  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParVector[T]] =
-    new GenericCanCombineFrom[T]
+  /*implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParVector[T]] =
+    new GenericCanCombineFrom[T]*/
 
   def newBuilder[T]: Combiner[T, ParVector[T]] = newCombiner[T]
 
@@ -103,7 +104,7 @@ private[immutable] class LazyParVectorCombiner[T] extends Combiner[T, ParVector[
 
   def size: Int = sz
 
-  def +=(elem: T): this.type = {
+  def addOne(elem: T): this.type = {
     vectors.last += elem
     sz += 1
     this

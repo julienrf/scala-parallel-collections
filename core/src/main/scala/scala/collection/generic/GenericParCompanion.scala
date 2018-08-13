@@ -16,7 +16,7 @@ package generic
 
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.ParIterable
-import scala.collection.parallel.ParMap
+//import scala.collection.parallel.ParMap
 import scala.language.higherKinds
 
 /** A template class for companion objects of parallel collection classes.
@@ -36,7 +36,7 @@ trait GenericParCompanion[+CC[X] <: ParIterable[X]] {
   def newCombiner[A]: Combiner[A, CC[A]]
 }
 
-trait GenericParMapCompanion[+CC[P, Q] <: ParMap[P, Q]] {
-  def newCombiner[P, Q]: Combiner[(P, Q), CC[P, Q]]
-}
+//trait GenericParMapCompanion[+CC[P, Q] <: ParMap[P, Q]] {
+//  def newCombiner[P, Q]: Combiner[(P, Q), CC[P, Q]]
+//}
 
