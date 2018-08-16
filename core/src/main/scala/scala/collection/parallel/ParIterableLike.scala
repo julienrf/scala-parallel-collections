@@ -151,7 +151,8 @@ import scala.reflect.ClassTag
  */
 trait ParIterableLike[+T, +CC[X] <: ParIterable[X], +Repr <: ParIterable[T], +Sequential <: Iterable[T] with IterableOps[T, Iterable /* TODO */, Sequential]]
 extends /*GenIterableLike[T, Repr]
-   with*/ CustomParallelizable[T, Repr]
+   with*/ IterableOnce[T]
+   with CustomParallelizable[T, Repr]
    with Parallel
    with HasNewCombiner[T, Repr]
 {

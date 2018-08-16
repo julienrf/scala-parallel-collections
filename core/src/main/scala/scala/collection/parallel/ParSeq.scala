@@ -47,6 +47,7 @@ trait ParSeq[+T] extends /*GenSeq[T]
 
   // TODO remove these definitions inlined from ParSeqLike
   final def size: Int = length
+  final def knownSize = length
   def length: Int
 }
 
