@@ -801,24 +801,28 @@ self =>
     tasksupport.executeAndWaitResult(new CopyToArray(start, len, xs, splitter))
   }
 
-  def sameElements[U >: T](that: Iterable[U]) = seq.iterator.sameElements(that)
-/*
-  def zip[U >: T, S, That](that: GenIterable[S])(implicit bf: OldCanBuildFrom[Repr, (U, S), That]): That = if (bf(repr).isCombiner && that.isParSeq) {
-    val thatseq = that.asParSeq
-    tasksupport.executeAndWaitResult(new Zip(combinerFactory(() => bf(repr).asCombiner), splitter, thatseq.splitter) mapResult { _.resultWithTaskSupport })
-  } else setTaskSupport(seq.zip(that)(bf2seq(bf)), tasksupport)
+  def sameElements[U >: T](that: ParIterable[U]) = seq.iterator.sameElements(that)
 
-  def zipWithIndex[U >: T, That](implicit bf: OldCanBuildFrom[Repr, (U, Int), That]): That = this zip immutable.ParRange(0, size, 1, inclusive = false)
+  def zip[U >: T, S](that: ParIterable[S]): CC[(U, S)] = {
+    that match {
+      case thatseq: ParSeq[S] =>
+        tasksupport.executeAndWaitResult(new Zip(combinerFactory(() => companion.newCombiner[(U, S)]), splitter, thatseq.splitter) mapResult { _.resultWithTaskSupport })
+      case _ =>
+        (companion.newBuilder[(U, S)] ++= setTaskSupport(seq.zip(that.seq), tasksupport)).result()
+    }
+  }
 
-  def zipAll[S, U >: T, That](that: GenIterable[S], thisElem: U, thatElem: S)(implicit bf: OldCanBuildFrom[Repr, (U, S), That]): That = if (bf(repr).isCombiner && that.isParSeq) {
-    val thatseq = that.asParSeq
+//  def zipWithIndex[U >: T]: CC[(U, Int)] = this zip immutable.ParRange(0, size, 1, inclusive = false)
+
+  def zipAll[S, U >: T](that: ParIterable[S], thisElem: U, thatElem: S): CC[(U, S)] = {
+    val thatseq = that.toSeq
     tasksupport.executeAndWaitResult(
-      new ZipAll(size max thatseq.length, thisElem, thatElem, combinerFactory(() => bf(repr).asCombiner), splitter, thatseq.splitter) mapResult {
+      new ZipAll(size max thatseq.length, thisElem, thatElem, combinerFactory(() => companion.newCombiner[(U, S)]), splitter, thatseq.splitter) mapResult {
         _.resultWithTaskSupport
       }
     )
-  } else setTaskSupport(seq.zipAll(that, thisElem, thatElem)(bf2seq(bf)), tasksupport)
-*/
+  }
+
   protected def toParCollection[U >: T, That](cbf: () => Combiner[U, That]): That = {
     tasksupport.executeAndWaitResult(new ToParCollection(combinerFactory(cbf), splitter) mapResult { _.resultWithTaskSupport })
   }
@@ -849,7 +853,7 @@ self =>
 */
   /*override*/ def toIterable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
 
-  /*override*/ def toSeq: ParSeq[T] = toParCollection[T, ParSeq[T]](() => immutable.ParVector/*ParSeq*/.newCombiner[T])
+  def toSeq: ParSeq[T] = toParCollection[T, ParSeq[T]](() => ParSeq.newCombiner[T])
 /*
   override def toSet[U >: T]: immutable.ParSet[U] = toParCollection[U, immutable.ParSet[U]](() => immutable.ParSet.newCombiner[U])
 

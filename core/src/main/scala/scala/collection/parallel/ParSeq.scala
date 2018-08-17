@@ -34,7 +34,7 @@ import scala.collection.generic.ParFactory
 trait ParSeq[+T] extends /*GenSeq[T]
                     with*/ ParIterable[T]
                     with GenericParTemplate[T, ParSeq]
-                    with ParIterableLike[T, ParSeq, ParSeq[T], Seq[T]]
+                    with ParSeqLike[T, ParSeq, ParSeq[T], Seq[T]]
 {
   override def companion: /*GenericCompanion[ParSeq] with*/ GenericParCompanion[ParSeq] = ParSeq
   //protected[this] override def newBuilder = ParSeq.newBuilder[T]
@@ -45,10 +45,6 @@ trait ParSeq[+T] extends /*GenSeq[T]
 
   override def stringPrefix = getClass.getSimpleName
 
-  // TODO remove these definitions inlined from ParSeqLike
-  final def size: Int = length
-  final def knownSize = length
-  def length: Int
 }
 
 object ParSeq extends ParFactory[ParSeq] {
