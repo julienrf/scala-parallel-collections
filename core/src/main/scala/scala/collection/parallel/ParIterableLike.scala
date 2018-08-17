@@ -339,11 +339,6 @@ self =>
     def asCombiner = cb.asInstanceOf[Combiner[Elem, To]]
   }
 
-  protected[this] def bf2seq[S, That](bf: OldCanBuildFrom[Repr, S, That]) = new OldCanBuildFrom[Sequential, S, That] {
-    def apply(from: Sequential) = bf.apply(newCombiner.fromSequential(from))
-    def apply() = bf.apply()
-  }
-
   protected[this] def sequentially[S, That <: Parallel](b: Sequential => Sequential) = newCombiner.fromSequential(b(seq))
 
   def mkString(start: String, sep: String, end: String): String = seq.mkString(start, sep, end)

@@ -32,7 +32,7 @@ trait ParIterable[+T]
   extends /*GenIterable[T]
     with*/ GenericParTemplate[T, ParIterable]
     with ParIterableLike[T, ParIterable, ParIterable[T], Iterable[T]] {
-  override def companion: GenericParCompanion[ParIterable] = ParIterable
+  def companion: GenericParCompanion[ParIterable] = ParIterable
 
   def stringPrefix = "ParIterable"
 }

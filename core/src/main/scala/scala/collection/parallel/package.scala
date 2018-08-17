@@ -13,8 +13,6 @@
 package scala
 package collection
 
-import scala.collection.generic.OldCanBuildFrom
-import scala.collection.generic.CanCombineFrom
 //import scala.collection.parallel.mutable.ParArray
 import scala.collection.mutable.UnrolledBuffer
 import scala.annotation.unchecked.uncheckedVariance
@@ -68,13 +66,6 @@ package object parallel {
 package parallel {
   /** Implicit conversions used in the implementation of parallel collections. */
   private[collection] object ParallelCollectionImplicits {
-    implicit def factory2ops[From, Elem, To](bf: OldCanBuildFrom[From, Elem, To]) = new FactoryOps[From, Elem, To] {
-      def isParallel = bf.isInstanceOf[Parallel]
-      def asParallel = bf.asInstanceOf[CanCombineFrom[From, Elem, To]]
-      def ifParallel[R](isbody: CanCombineFrom[From, Elem, To] => R) = new Otherwise[R] {
-        def otherwise(notbody: => R) = if (isParallel) isbody(asParallel) else notbody
-      }
-    }
     implicit def traversable2ops[T](t: scala.collection.IterableOnce[T]) = new TraversableOps[T] {
       def isParallel = t.isInstanceOf[Parallel]
       def isParIterable = t.isInstanceOf[ParIterable[_]]
@@ -85,16 +76,6 @@ package parallel {
         def otherwise(notbody: => R) = if (isParallel) isbody(asParSeq) else notbody
       }
     }
-  }
-
-  trait FactoryOps[From, Elem, To] {
-    trait Otherwise[R] {
-      def otherwise(notbody: => R): R
-    }
-
-    def isParallel: Boolean
-    def asParallel: CanCombineFrom[From, Elem, To]
-    def ifParallel[R](isbody: CanCombineFrom[From, Elem, To] => R): Otherwise[R]
   }
 
   trait TraversableOps[T] {
