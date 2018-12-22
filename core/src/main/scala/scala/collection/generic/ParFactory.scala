@@ -30,28 +30,6 @@ import scala.language.higherKinds
 abstract class ParFactory[CC[X] <: ParIterable[X] with GenericParTemplate[X, CC]]
 extends GenericParCompanion[CC] {
 
-  /** The underlying collection type with unknown element type */
-  protected[this] type Coll = CC[_]
-
-  /** An empty collection of type `$Coll[A]`
-   *  @tparam A      the type of the ${coll}'s elements
-   */
-  def empty[A]: CC[A] = newBuilder[A].result()
-
-  /** Creates a $coll with the specified elements.
-   *  @tparam A      the type of the ${coll}'s elements
-   *  @param elems  the elements of the created $coll
-   *  @return a new $coll with elements `elems`
-   */
-  def apply[A](elems: A*): CC[A] = {
-    if (elems.isEmpty) empty[A]
-    else {
-      val b = newBuilder[A]
-      b ++= elems
-      b.result()
-    }
-  }
-
   /** Concatenates all argument collections into a single $coll.
    *
    *  @param xss the collections that are to be concatenated.

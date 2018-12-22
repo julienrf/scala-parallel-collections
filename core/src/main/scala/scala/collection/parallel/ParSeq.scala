@@ -36,7 +36,7 @@ trait ParSeq[+T] extends /*GenSeq[T]
                     with GenericParTemplate[T, ParSeq]
                     with ParSeqLike[T, ParSeq, ParSeq[T], Seq[T]]
 {
-  override def companion: /*GenericCompanion[ParSeq] with*/ GenericParCompanion[ParSeq] = ParSeq
+  override def companion: GenericParCompanion[ParSeq] = ParSeq
   //protected[this] override def newBuilder = ParSeq.newBuilder[T]
 
   def apply(i: Int): T

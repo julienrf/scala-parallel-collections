@@ -27,6 +27,29 @@ import scala.language.higherKinds
  *  @since 2.8
  */
 trait GenericParCompanion[+CC[X] <: ParIterable[X]] {
+
+  /** The underlying collection type with unknown element type */
+  protected[this] type Coll = CC[_]
+
+  /** An empty collection of type `$Coll[A]`
+    *  @tparam A      the type of the ${coll}'s elements
+    */
+  def empty[A]: CC[A] = newBuilder[A].result()
+
+  /** Creates a $coll with the specified elements.
+    *  @tparam A      the type of the ${coll}'s elements
+    *  @param elems  the elements of the created $coll
+    *  @return a new $coll with elements `elems`
+    */
+  def apply[A](elems: A*): CC[A] = {
+    if (elems.isEmpty) empty[A]
+    else {
+      val b = newBuilder[A]
+      b ++= elems
+      b.result()
+    }
+  }
+
   /** The default builder for $Coll objects.
    */
   def newBuilder[A]: Combiner[A, CC[A]]
