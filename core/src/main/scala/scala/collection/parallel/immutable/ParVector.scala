@@ -64,6 +64,11 @@ extends scala.collection.parallel.ParSeq[T]
 
   /*override*/ def toVector: Vector[T] = vector
 
+  // TODO Implement ParVectorIterator without extending VectorIterator, which will eventually
+  // become private final. Inlining the contents of the current VectorIterator is not as easy
+  // as it seems because it relies a lot on Vector internals.
+  // Duplicating the whole Vector data structure seems to be the safest way, but we will loose
+  // interoperability with the standard Vector.
   class ParVectorIterator(_start: Int, _end: Int) extends VectorIterator[T](_start, _end) with SeqSplitter[T] {
     def remaining: Int = remainingElementCount
     def dup: SeqSplitter[T] = (new ParVector(remainingVector)).splitter

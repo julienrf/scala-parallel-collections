@@ -9,7 +9,7 @@ scalaVersionsByJvm in ThisBuild := {
     11 -> List(v213 -> false))
 }
 
-scalacOptions in ThisBuild ++= Seq("-deprecation", "-feature", "-Xfatal-warnings")
+scalacOptions in ThisBuild ++= Seq("-deprecation", "-feature"/*, "-Xfatal-warnings"*/)
 
 cancelable in Global := true
 
@@ -57,7 +57,7 @@ lazy val core = project.in(file("core"))
   OsgiKeys.importPackage := Seq(osgiImport("scala*", scalaVersion.value), "*"),
   mimaPreviousVersion := None,
   resolvers += "scala-integration" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  scalaVersion := "2.13.0-pre-d08e53f"
+  scalaVersion := "2.13.0-pre-021a9a4"
 )
 
 lazy val junit = project.in(file("junit"))
