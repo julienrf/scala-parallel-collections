@@ -2,8 +2,10 @@ import ScalaModulePlugin._
 
 version in ThisBuild := "0.1.3-SNAPSHOT"
 
+resolvers in ThisBuild += "scala-integration" at "https://scala-ci.typesafe.com/artifactory/scala-integration/"
+
 scalaVersionsByJvm in ThisBuild := {
-  val v213 = "2.13.0-M3"
+  val v213 = "2.13.0-pre-021a9a4"
   Map(
     8 -> List(v213 -> true),
     11 -> List(v213 -> false))
@@ -55,9 +57,7 @@ lazy val core = project.in(file("core"))
   ),
   // Use correct version for scala package imports
   OsgiKeys.importPackage := Seq(osgiImport("scala*", scalaVersion.value), "*"),
-  mimaPreviousVersion := None,
-  resolvers += "scala-integration" at "https://scala-ci.typesafe.com/artifactory/scala-integration/",
-  scalaVersion := "2.13.0-pre-021a9a4"
+  mimaPreviousVersion := None
 )
 
 lazy val junit = project.in(file("junit"))
