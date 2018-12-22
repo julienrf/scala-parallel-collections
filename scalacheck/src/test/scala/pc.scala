@@ -14,25 +14,25 @@ package scala {
     // Included tests have to be abstract classes, otherwise sbt tries to instantiate them on its own and fails
     def includeAllTestsWith(support: TaskSupport): Unit = {
       // parallel arrays with default task support
-      include(new mutable.IntParallelArrayCheck(support) {})
+//      include(new mutable.IntParallelArrayCheck(support) {})
     
       // parallel ranges
-      include(new immutable.ParallelRangeCheck(support) {})
+//      include(new immutable.ParallelRangeCheck(support) {})
     
       // parallel immutable hash maps (tries)
-      include(new immutable.IntIntParallelHashMapCheck(support) {})
+//      include(new immutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel immutable hash sets (tries)
-      include(new immutable.IntParallelHashSetCheck(support) {})
+//      include(new immutable.IntParallelHashSetCheck(support) {})
     
       // parallel mutable hash maps (tables)
-      include(new mutable.IntIntParallelHashMapCheck(support) {})
+//      include(new mutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel ctrie
-      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})
+//      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})
     
       // parallel mutable hash sets (tables)
-      include(new mutable.IntParallelHashSetCheck(support) {})
+//      include(new mutable.IntParallelHashSetCheck(support) {})
     
       // parallel vectors
       include(new immutable.IntParallelVectorCheck(support) {})

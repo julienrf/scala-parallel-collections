@@ -1471,11 +1471,17 @@ self =>
     debugBuffer += s
   }
 
-/*  import scala.collection.DebugUtils._
+  private def buildString(closure: (Any => Unit) => Unit): String = {
+    var output = ""
+    closure(output += _.toString + "\n")
+
+    output
+  }
+
   private[parallel] def printDebugBuffer() = println(buildString {
     append =>
     for (s <- debugBuffer) {
       append(s)
     }
-  })*/
+  })
 }
