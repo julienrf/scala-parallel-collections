@@ -34,7 +34,7 @@ import scala.collection.generic.ParFactory
 trait ParSeq[+T] extends /*GenSeq[T]
                     with*/ ParIterable[T]
                     with GenericParTemplate[T, ParSeq]
-                    with ParSeqLike[T, ParSeq, ParSeq[T], Seq[T]]
+                    with ParSeqLike[T, ParSeq, ParSeq[T], scala.collection.Seq[T]]
 {
   override def companion: GenericParCompanion[ParSeq] = ParSeq
   //protected[this] override def newBuilder = ParSeq.newBuilder[T]

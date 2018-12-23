@@ -50,7 +50,7 @@ import scala.collection.parallel.ParallelCollectionImplicits._
  *  @author Aleksandar Prokopec
  *  @since 2.9
  */
-trait ParSeqLike[+T, +CC[X] <: ParIterable[X], +Repr <: ParSeq[T], +Sequential <: Seq[T] with SeqOps[T, AnyConstr, Sequential]]
+trait ParSeqLike[+T, +CC[X] <: ParSeq[X], +Repr <: ParSeq[T], +Sequential <: scala.collection.Seq[T] with SeqOps[T, AnyConstr, Sequential]]
 extends /*scala.collection.GenSeqLike[T, Repr]
    with*/ ParIterableLike[T, CC, Repr, Sequential] {
 self =>
@@ -238,7 +238,7 @@ self =>
     } else patch_sequential(from, patch.seq, replaced)
   }
 
-  private def patch_sequential[U >: T](fromarg: Int, patch: Seq[U], r: Int): CC[U] = {
+  private def patch_sequential[U >: T](fromarg: Int, patch: scala.collection.Seq[U], r: Int): CC[U] = {
     val from = 0 max fromarg
     val b = companion.newBuilder[U]
     val repl = (r min (length - from)) max 0
