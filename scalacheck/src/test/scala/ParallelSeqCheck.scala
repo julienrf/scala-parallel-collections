@@ -27,10 +27,7 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
   )
 
 
-  def fromTraversable(t: Traversable[T]) = fromSeq(traversable2Seq(t))
-  def traversable2Seq(t: Traversable[T]): Seq[T] = {
-    if (t.isInstanceOf[Iterable[_]]) t.asInstanceOf[Iterable[T]].iterator.toList else t.toList
-  }
+  def fromIterable(t: Iterable[T]) = fromSeq(t.toSeq)
 
   override def collectionPairs: Gen[(Seq[T], CollType)] = for (inst <- instances(values)) yield (inst, fromSeq(inst))
 
@@ -118,19 +115,19 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
     {
       val sr = s.reverse
       val cr = coll.reverse
-      if (sr != cr) {
+      if (!sr.sameElements(cr)) {
         println("from: " + s)
         println("and: " + coll)
         println(sr)
         println(cr)
       }
-      sr == cr
+      sr sameElements cr
     }
   }
 
   property("reverseMaps must be equal") = forAllNoShrink(collectionPairs) { case (s, coll) =>
     (for ((f, ind) <- reverseMapFunctions.zipWithIndex) yield {
-      ("operator " + ind) |: s.reverseMap(f) == coll.reverseMap(f)
+      ("operator " + ind) |: s.reverseIterator.map(f).toSeq.sameElements(coll.reverseMap(f))
     }).reduceLeft(_ && _)
   }
 
@@ -233,36 +230,36 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
     if (s.length > 0) {
       val supd = s.updated(pos, s(0))
       val cupd = coll.updated(pos, coll(0))
-      if (supd != cupd) {
+      if (!supd.sameElements(cupd)) {
         println("from: " + s)
         println("and: " + coll)
         println(supd)
         println(cupd)
       }
-      "from first" |: (supd == cupd)
+      "from first" |: (supd sameElements cupd)
     } else "trivially" |: true
   }
 
   property("prepends must be equal") = forAllNoShrink(collectionPairs) { case (s, coll) =>
-    s.length == 0 || s(0) +: s == coll(0) +: coll
+    s.length == 0 || (s(0) +: s).sameElements(coll(0) +: coll)
   }
 
   property("appends must be equal") = forAllNoShrink(collectionPairs) { case (s, coll) =>
-    s.length == 0 || s :+ s(0) == coll :+ coll(0)
+    s.length == 0 || (s :+ s(0)).sameElements(coll :+ coll(0))
   }
 
   property("padTos must be equal") = forAllNoShrink(collectionPairsWithLengths) { case (s, coll, len) =>
     val someValue = sampleValue
     val sdoub = s.padTo(len * 2, someValue)
     val cdoub = coll.padTo(len * 2, someValue)
-    if (sdoub != cdoub) {
+    if (!sdoub.sameElements(cdoub)) {
       println("from: " + s)
       println("and: " + coll)
       println(sdoub)
       println(cdoub)
     }
-    ("smaller" |: s.padTo(len / 2, someValue) == coll.padTo(len / 2, someValue)) &&
-      ("bigger" |: sdoub == cdoub)
+    ("smaller" |: s.padTo(len / 2, someValue).sameElements(coll.padTo(len / 2, someValue))) &&
+    ("bigger" |: sdoub.sameElements(cdoub))
   }
 
   property("corresponds must be equal") = forAllNoShrink(collectionPairsWithModified) { case (s, coll, modified) =>

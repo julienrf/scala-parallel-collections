@@ -6,6 +6,7 @@ import org.scalacheck.Gen._
 import org.scalacheck.Prop._
 import org.scalacheck.Properties
 
+import scala.language.higherKinds
 import scala.collection._
 import scala.collection.parallel._
 
@@ -14,7 +15,7 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 
   def values: Seq[Gen[T]]
   def ofSize(vals: Seq[Gen[T]], sz: Int): Iterable[T]
-  def fromTraversable(t: Traversable[T]): CollType
+  def fromIterable(t: Iterable[T]): CollType
   def isCheckingViews: Boolean
   def hasStrictOrder: Boolean
 
@@ -30,7 +31,7 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
   )
 
   // used to check if constructed collection is valid
-  def checkDataStructureInvariants(orig: Traversable[T], cf: AnyRef) = {
+  def checkDataStructureInvariants(orig: Iterable[T], cf: AnyRef) = {
     // can be overridden in subclasses
     true
   }
@@ -49,21 +50,21 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 
   def sampleValue: T = sample(values(rnd.nextInt(values.length)))
 
-  def collectionPairs = for (inst <- instances(values)) yield (inst, fromTraversable(inst))
+  def collectionPairs = for (inst <- instances(values)) yield (inst, fromIterable(inst))
 
   def collectionPairsWithLengths = for (inst <- instances(values); s <- choose(0, inst.size))
-    yield (inst, fromTraversable(inst), s)
+    yield (inst, fromIterable(inst), s)
 
   def collectionPairsWith2Indices = for (
       inst <- instances(values);
       f <- choose(0, inst.size);
       s <- choose(0, inst.size))
-    yield (inst, fromTraversable(inst), f, s)
+    yield (inst, fromIterable(inst), f, s)
 
   def collectionTriplets = for (inst <- instances(values);
       updStart <- choose(0, inst.size); howMany <- choose(0, inst.size)) yield {
     val modif = inst.toSeq.patch(updStart, inst.toSeq, howMany)
-    (inst, fromTraversable(inst), modif)
+    (inst, fromIterable(inst), modif)
   }
 
 //  def areEqual(t1: GenTraversable[T], t2: GenTraversable[T]) = if (hasStrictOrder) {
@@ -84,7 +85,7 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
     println(coll.tasksupport.debugMessages.mkString("\n"))
   }
 
-  def printComparison(t: Traversable[_], coll: ParIterable[_], tf: Traversable[_], cf: ParIterable[_], ind: Int): Unit = {
+  def printComparison(t: Iterable[_], coll: ParIterable[_], tf: Iterable[_], cf: ParIterable[_], ind: Int): Unit = {
     printDebugInfo(coll)
     println("Operator: " + ind)
     println("sz: " + t.size)
@@ -100,8 +101,8 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
     println("size: " + cf.size)
     println(cf)
     println
-//    println("tf == cf - " + (tf == cf))
-//    println("cf == tf - " + (cf == tf))
+    println("tf sameElements cf - " + (tf.iterator sameElements  cf))
+    println("cf sameElements tf - " + (cf.iterator sameElements tf))
   }
 
   property("reductions must be equal for assoc. operators") = forAllNoShrink(collectionPairs) { case (t, coll) =>
@@ -241,15 +242,15 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 
   if (!isCheckingViews) property("partitions must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
     (for ((p, ind) <- partitionPredicates.zipWithIndex) yield {
-      val tpart = t.partition(p)
-      val cpart = coll.partition(p)
-      if (tpart != cpart) {
+      val tpart @ (tpart1, tpart2) = t.partition(p)
+      val cpart @ (cpart1, cpart2) = coll.partition(p)
+      if (!tpart1.iterator.sameElements(cpart1) || !tpart2.iterator.sameElements(cpart2)) {
         println("from: " + t)
         println("and: " + coll)
         println(cpart)
         println(tpart)
       }
-      ("op index: " + ind) |: tpart == cpart
+      ("op index: " + ind) |: (tpart1.iterator.sameElements(cpart1) && tpart2.iterator.sameElements(cpart2))
     }).reduceLeft(_ && _)
   }
 
@@ -286,16 +287,16 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 //  }
 
   if (hasStrictOrder) property("splits must be equal") = forAllNoShrink(collectionPairsWithLengths) { case (t, coll, n) =>
-    val tspl = t.splitAt(n)
-    val cspl = coll.splitAt(n)
-    if (tspl != cspl) {
+    val tspl @ (tspl1, tspl2) = t.splitAt(n)
+    val cspl @ (cspl1, cspl2) = coll.splitAt(n)
+    if (!tspl1.iterator.sameElements(cspl1) || !tspl2.iterator.sameElements(cspl2)) {
       println("at: " + n)
       println("from: " + t)
       println("and: " + coll)
       println(tspl)
       println(cspl)
     }
-    ("splitAt " + n) |: tspl == cspl
+    ("splitAt " + n) |: (tspl1.iterator.sameElements(cspl1) && tspl2.iterator.sameElements(cspl2))
   }
 
 //  if (hasStrictOrder) property("takeWhiles must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
@@ -315,9 +316,9 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 
   if (hasStrictOrder) property("spans must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
     (for ((pred, ind) <- spanPredicates.zipWithIndex) yield {
-      val tsp = t.span(pred)
-      val csp = coll.span(pred)
-      if (tsp != csp) {
+      val tsp @ (tsp1, tsp2) = t.span(pred)
+      val csp @ (csp1, csp2) = coll.span(pred)
+      if (!tsp1.iterator.sameElements(csp1) || !tsp2.iterator.sameElements(csp2)) {
         println("from: " + t)
         println("and: " + coll)
         println("span with predicate " + ind)
@@ -327,7 +328,7 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
         println(coll.span(pred))
         println("---------------------------------")
       }
-      ("operator " + ind) |: tsp == csp
+      ("operator " + ind) |: (tsp1.iterator.sameElements(csp1) && tsp2.iterator.sameElements(csp2))
     }).reduceLeft(_ && _)
   }
 

@@ -796,6 +796,7 @@ self =>
     tasksupport.executeAndWaitResult(new CopyToArray(start, len, xs, splitter))
   }
 
+  // FIXME Push down to `ParSeq`?
   def sameElements[U >: T](that: ParIterable[U]) = seq.iterator.sameElements(that)
 
   def zip[U >: T, S](that: ParIterable[S]): CC[(U, S)] = {
