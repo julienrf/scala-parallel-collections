@@ -797,7 +797,7 @@ self =>
   }
 
   // FIXME Push down to `ParSeq`?
-  def sameElements[U >: T](that: ParIterable[U]) = seq.iterator.sameElements(that)
+  def sameElements[U >: T](that: IterableOnce[U]) = seq.iterator.sameElements(that)
 
   def zip[U >: T, S](that: ParIterable[S]): CC[(U, S)] = {
     that match {

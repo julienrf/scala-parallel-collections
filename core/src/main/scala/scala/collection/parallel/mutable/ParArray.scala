@@ -83,7 +83,7 @@ self =>
 
   def length = sz
 
-  def seq = arrayseq
+  def seq = (if (length == arrayseq.length) arrayseq else arrayseq.take(length)): ArraySeq[T]
 
   protected[parallel] def splitter: ParArrayIterator = {
     val pit = new ParArrayIterator

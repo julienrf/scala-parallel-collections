@@ -193,7 +193,7 @@ self =>
     }
   }
 
-  override def sameElements[U >: T](that: ParIterable[U]): Boolean = {
+  override def sameElements[U >: T](that: IterableOnce[U]): Boolean = {
     that match {
       case pthat: ParSeq[U] =>
         val ctx = new DefaultSignalling with VolatileAbort
