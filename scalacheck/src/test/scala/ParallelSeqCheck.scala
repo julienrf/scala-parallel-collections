@@ -131,80 +131,80 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
     }).reduceLeft(_ && _)
   }
 
-//  property("sameElements must be equal") = forAllNoShrink(collectionPairsWithModifiedWithLengths) {
-//  case (s, coll, collmodif, len) =>
-//    val pos = if (len < 0) 0 else len
-//    val scm = s.sameElements(collmodif)
-//    val ccm = coll.sameElements(collmodif)
-//    if (scm != ccm) {
-//      println("Comparing: " + s)
-//      println("and: " + coll)
-//      println("with: " + collmodif)
-//      println(scm)
-//      println(ccm)
-//    }
-//    ("Nil" |: s.sameElements(Nil) == coll.sameElements(Nil)) &&
-//    ("toList" |: s.sameElements(s.toList) == coll.sameElements(coll.toList)) &&
-//    ("identity" |: s.sameElements(s.map(e => e)) == coll.sameElements(coll.map(e => e))) &&
-//    ("vice-versa" |: s.sameElements(coll) == coll.sameElements(s)) &&
-//    ("equal" |: s.sameElements(coll)) &&
-//    ("modified" |: scm == ccm) &&
-//    (for ((it, ind) <- sameElementsSeqs.zipWithIndex) yield {
-//      val sres = s.sameElements(it)
-//      val pres = coll.sameElements(it)
-//      if (sres != pres) {
-//        println("Comparing: " + s)
-//        println("and: " + coll)
-//        println("with: " + it)
-//        println(sres)
-//        println(pres)
-//      }
-//      ("collection " + ind) |: sres == pres
-//    }).reduceLeft(_ && _)
-//  }
+  property("sameElements must be equal") = forAllNoShrink(collectionPairsWithModifiedWithLengths) {
+  case (s, coll, collmodif, len) =>
+    val pos = if (len < 0) 0 else len
+    val scm = s.sameElements(collmodif)
+    val ccm = coll.sameElements(collmodif)
+    if (scm != ccm) {
+      println("Comparing: " + s)
+      println("and: " + coll)
+      println("with: " + collmodif)
+      println(scm)
+      println(ccm)
+    }
+    ("Nil" |: s.sameElements(Nil) == coll.sameElements(Nil)) &&
+    ("toList" |: s.sameElements(s.toList) == coll.sameElements(coll.toList)) &&
+    ("identity" |: s.sameElements(s.map(e => e)) == coll.sameElements(coll.map(e => e))) &&
+    ("vice-versa" |: s.sameElements(coll) == coll.sameElements(s)) &&
+    ("equal" |: s.sameElements(coll)) &&
+    ("modified" |: scm == ccm) &&
+    (for ((it, ind) <- sameElementsSeqs.zipWithIndex) yield {
+      val sres = s.sameElements(it)
+      val pres = coll.sameElements(it)
+      if (sres != pres) {
+        println("Comparing: " + s)
+        println("and: " + coll)
+        println("with: " + it)
+        println(sres)
+        println(pres)
+      }
+      ("collection " + ind) |: sres == pres
+    }).reduceLeft(_ && _)
+  }
 
-//  property("startsWiths must be equal") = forAllNoShrink(collectionPairsWithModifiedWithLengths) {
-//  case (s, coll, collmodif, len) =>
-//    val pos = if (len < 0) 0 else len
-//    ("start with self" |: s.startsWith(s) == coll.startsWith(coll)) &&
-//    ("tails correspond" |: (s.length == 0 || s.startsWith(s.tail, 1) == coll.startsWith(coll.tail, 1))) &&
-//    ("with each other" |: coll.startsWith(s)) &&
-//    ("modified" |: s.startsWith(collmodif) == coll.startsWith(collmodif)) &&
-//    ("modified2" |: s.startsWith(collmodif, pos) == coll.startsWith(collmodif, pos)) &&
-//    (for (sq <- startEndSeqs) yield {
-//      val ss = s.startsWith(sq, pos)
-//      val cs = coll.startsWith(fromSeq(sq), pos)
-//      if (ss != cs) {
-//        println("from: " + s)
-//        println("and: " + coll)
-//        println("test seq: " + sq)
-//        println("from pos: " + pos)
-//        println(ss)
-//        println(cs)
-//        println(coll.iterator.psplit(pos, coll.length - pos)(1).toList)
-//      }
-//      ("seq " + sq) |: ss == cs
-//    }).reduceLeft(_ && _)
-//  }
+  property("startsWiths must be equal") = forAllNoShrink(collectionPairsWithModifiedWithLengths) {
+  case (s, coll, collmodif, len) =>
+    val pos = if (len < 0) 0 else len
+    ("start with self" |: s.startsWith(s) == coll.startsWith(coll)) &&
+    ("tails correspond" |: (s.length == 0 || s.startsWith(s.tail, 1) == coll.startsWith(coll.tail, 1))) &&
+    ("with each other" |: coll.startsWith(s)) &&
+    ("modified" |: s.startsWith(collmodif) == coll.startsWith(collmodif)) &&
+    ("modified2" |: s.startsWith(collmodif, pos) == coll.startsWith(collmodif, pos)) &&
+    (for (sq <- startEndSeqs) yield {
+      val ss = s.startsWith(sq, pos)
+      val cs = coll.startsWith(fromSeq(sq), pos)
+      if (ss != cs) {
+        println("from: " + s)
+        println("and: " + coll)
+        println("test seq: " + sq)
+        println("from pos: " + pos)
+        println(ss)
+        println(cs)
+        println(coll.iterator.psplit(pos, coll.length - pos)(1).toList)
+      }
+      ("seq " + sq) |: ss == cs
+    }).reduceLeft(_ && _)
+  }
 
-//  property("endsWiths must be equal") = forAllNoShrink(collectionPairsWithModified) {
-//  case (s, coll, collmodif) =>
-//    ("ends with self" |: s.endsWith(s) == coll.endsWith(s)) &&
-//    ("ends with tail" |: (s.length == 0 || s.endsWith(s.tail) == coll.endsWith(coll.tail))) &&
-//    ("with each other" |: coll.endsWith(s)) &&
-//    ("modified" |: s.startsWith(collmodif) == coll.endsWith(collmodif)) &&
-//    (for (sq <- startEndSeqs) yield {
-//      val sew = s.endsWith(sq)
-//      val cew = coll.endsWith(fromSeq(sq))
-//      if (sew != cew) {
-//        println("from: " + s)
-//        println("and: " + coll)
-//        println(sew)
-//        println(cew)
-//      }
-//      ("seq " + sq) |: sew == cew
-//    }).reduceLeft(_ && _)
-//  }
+  property("endsWiths must be equal") = forAllNoShrink(collectionPairsWithModified) {
+  case (s, coll, collmodif) =>
+    ("ends with self" |: s.endsWith(s) == coll.endsWith(s)) &&
+    ("ends with tail" |: (s.length == 0 || s.endsWith(s.tail) == coll.endsWith(coll.tail))) &&
+    ("with each other" |: coll.endsWith(s)) &&
+    ("modified" |: s.startsWith(collmodif) == coll.endsWith(collmodif)) &&
+    (for (sq <- startEndSeqs if s.nonEmpty /* guard because of https://github.com/scala/bug/issues/11328 */) yield {
+      val sew = s.endsWith(sq)
+      val cew = coll.endsWith(fromSeq(sq))
+      if (sew != cew) {
+        println("from: " + s)
+        println("and: " + coll)
+        println(sew)
+        println(cew)
+      }
+      ("seq " + sq) |: sew == cew
+    }).foldLeft(Prop.passed)(_ && _)
+  }
 
 //  property("unions must be equal") = forAllNoShrink(collectionPairsWithModified) { case (s, coll, collmodif) =>
 //    ("modified" |: s.union(collmodif.seq) == coll.union(collmodif)) &&

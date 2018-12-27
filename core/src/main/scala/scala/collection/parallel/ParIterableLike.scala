@@ -702,11 +702,11 @@ self =>
       })
     }) else setTaskSupport((companion.newCombiner[U] += z).result(), tasksupport)
   }
-/*
-  def scanLeft[S, That](z: S)(op: (S, T) => S)(implicit bf: CanBuildFrom[Repr, S, That]) = setTaskSupport(seq.scanLeft(z)(op)(bf2seq(bf)), tasksupport)
 
-  def scanRight[S, That](z: S)(op: (T, S) => S)(implicit bf: CanBuildFrom[Repr, S, That]) = setTaskSupport(seq.scanRight(z)(op)(bf2seq(bf)), tasksupport)
-*/
+  def scanLeft[S](z: S)(op: (S, T) => S): Iterable[S] = seq.scanLeft(z)(op)
+
+  def scanRight[S](z: S)(op: (T, S) => S): Iterable[S] = seq.scanRight(z)(op)
+
   /** Takes the longest prefix of elements that satisfy the predicate.
    *
    *  $indexsignalling

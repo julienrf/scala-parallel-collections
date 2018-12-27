@@ -181,16 +181,18 @@ self =>
    *  @param offset  the starting offset for the search
    *  @return        `true` if there is a sequence `that` starting at `offset` in this sequence, `false` otherwise
    */
-  def startsWith[S >: T](that: ParSeq[S], offset: Int): Boolean = {
-    if (offset < 0 || offset >= length) offset == length && that.length == 0
-    else if (that.length == 0) true
-    else if (that.length > length - offset) false
-    else {
-      val ctx = new DefaultSignalling with VolatileAbort
-      tasksupport.executeAndWaitResult(
-        new SameElements[S](splitter.psplitWithSignalling(offset, that.length)(1) assign ctx, that.splitter)
-      )
-    }
+  def startsWith[S >: T](that: IterableOnce[S], offset: Int = 0): Boolean = that match {
+    case pt: ParSeq[S] =>
+      if (offset < 0 || offset >= length) offset == length && pt.isEmpty
+      else if (pt.isEmpty) true
+      else if (pt.length > length - offset) false
+      else {
+        val ctx = new DefaultSignalling with VolatileAbort
+        tasksupport.executeAndWaitResult(
+          new SameElements[S](splitter.psplitWithSignalling(offset, pt.length)(1) assign ctx, pt.splitter)
+        )
+      }
+    case _ => seq.startsWith(that, offset)
   }
 
   override def sameElements[U >: T](that: IterableOnce[U]): Boolean = {
@@ -219,6 +221,16 @@ self =>
       tasksupport.executeAndWaitResult(new SameElements[S](splitter.psplitWithSignalling(length - tlen, tlen)(1) assign ctx, that.splitter))
     }
   }
+
+  /** Tests whether this $coll ends with the given collection.
+    *
+    *  $abortsignalling
+    *
+    *  @tparam S       the type of the elements of `that` sequence
+    *  @param that     the sequence to test
+    *  @return         `true` if this $coll has `that` as a suffix, `false` otherwise
+    */
+  def endsWith[S >: T](that: Iterable[S]): Boolean = seq.endsWith(that)
 
   def patch[U >: T](from: Int, patch: ParSeq[U], replaced: Int): CC[U] = {
     val realreplaced = replaced min (length - from)
