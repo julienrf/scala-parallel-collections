@@ -586,13 +586,11 @@ self =>
   def filterNot(pred: T => Boolean): Repr = {
     tasksupport.executeAndWaitResult(new FilterNot(pred, combinerFactory, splitter) mapResult { _.resultWithTaskSupport })
   }
-/*
-  def ++[U >: T, That](that: GenTraversableOnce[U])(implicit bf: OldCanBuildFrom[Repr, U, That]): That = {
-    if (that.isParallel && bf.isParallel) {
+
+  def ++[U >: T](that: IterableOnce[U]): CC[U] = that match {
+    case other: ParIterable[U] =>
       // println("case both are parallel")
-      val other = that.asParIterable
-      val pbf = bf.asParallel
-      val cfactory = combinerFactory(() => pbf(repr))
+      val cfactory = combinerFactory(() => companion.newCombiner[U])
       val copythis = new Copy(cfactory, splitter)
       val copythat = wrap {
         val othtask = new other.Copy(cfactory, other.splitter)
@@ -602,24 +600,17 @@ self =>
         _.resultWithTaskSupport
       }
       tasksupport.executeAndWaitResult(task)
-    } else if (bf(repr).isCombiner) {
+    case _ =>
       // println("case parallel builder, `that` not parallel")
-      val copythis = new Copy(combinerFactory(() => bf(repr).asCombiner), splitter)
+      val copythis = new Copy(combinerFactory(() => companion.newCombiner[U]), splitter)
       val copythat = wrap {
-        val cb = bf(repr).asCombiner
-        for (elem <- that.seq) cb += elem
+        val cb = companion.newCombiner[U]
+        cb ++= that
         cb
       }
       tasksupport.executeAndWaitResult((copythis parallel copythat) { _ combine _ } mapResult { _.resultWithTaskSupport })
-    } else {
-      // println("case not a parallel builder")
-      val b = bf(repr)
-      this.splitter.copy2builder[U, That, Builder[U, That]](b)
-      for (elem <- that.seq) b += elem
-      setTaskSupport(b.result(), tasksupport)
-    }
   }
-*/
+
   def partition(pred: T => Boolean): (Repr, Repr) = {
     tasksupport.executeAndWaitResult(
       new Partition(pred, combinerFactory, combinerFactory, splitter) mapResult {
