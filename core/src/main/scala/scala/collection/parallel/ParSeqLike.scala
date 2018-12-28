@@ -58,6 +58,19 @@ self =>
   // Members previously inherited from scala.collection.GenSeqLike
   def length: Int
   def apply(index: Int): T
+
+  override def hashCode()= scala.util.hashing.MurmurHash3.orderedHash(seq, "ParSeq".hashCode)
+
+  /** The equals method for arbitrary parallel sequences. Compares this
+    * parallel sequence to some other object.
+    *  @param    that  The object to compare the sequence to
+    *  @return   `true` if `that` is a sequence that has the same elements as
+    *            this sequence in the same order, `false` otherwise
+    */
+  override def equals(that: Any): Boolean = that match {
+    case that: ParSeq[_] => (that eq this.asInstanceOf[AnyRef]) || (that canEqual this) && (this sameElements that)
+    case _               => false
+  }
   //---
 
 

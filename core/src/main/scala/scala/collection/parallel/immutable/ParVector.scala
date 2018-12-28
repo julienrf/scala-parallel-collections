@@ -61,7 +61,7 @@ extends ParSeq[T]
 
   override def seq: Vector[T] = vector
 
-  /*override*/ def toVector: Vector[T] = vector
+  override def toVector: Vector[T] = vector
 
   // TODO Implement ParVectorIterator without extending VectorIterator, which will eventually
   // become private final. Inlining the contents of the current VectorIterator is not as easy

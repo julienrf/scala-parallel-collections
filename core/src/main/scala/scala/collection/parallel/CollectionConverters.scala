@@ -12,103 +12,95 @@
 
 package scala.collection.parallel
 
-//import scala.language.implicitConversions
-//import scala.{collection => sc}
-//import scala.collection.{mutable => scm, immutable => sci, concurrent => scc}
-//
-//import scala.collection._
-//
-///** Extension methods for `.par` on sequential collections. */
-//object CollectionConverters extends CollectionConvertersLowPriority {
-//
-//  // Traversable & Iterable
-//
-//  implicit class TraversableIsParallelizable[A](private val coll: sc.Traversable[A]) extends AnyVal with CustomParallelizable[A, ParIterable[A]] {
-//    def seq = coll
-//    override def par = coll match {
+import scala.language.implicitConversions
+import scala.{collection => sc}
+import scala.collection.{mutable => scm, immutable => sci/*, concurrent => scc*/}
+
+/** Extension methods for `.par` on sequential collections. */
+object CollectionConverters extends CollectionConvertersLowPriority {
+
+  // Traversable & Iterable
+
+  implicit class IterableIsParallelizable[A](private val coll: sc.Iterable[A]) extends AnyVal with sc.CustomParallelizable[A, ParIterable[A]] {
+    def seq = coll
+    override def par = coll match {
 //      case coll: sc.Set[_] => new SetIsParallelizable(coll.asInstanceOf[sc.Set[A]]).par
 //      case coll: sc.Map[_, _] => new MapIsParallelizable(coll.asInstanceOf[sc.Map[_, _]]).par.asInstanceOf[ParIterable[A]]
-//      case coll: sci.Iterable[_] => new ImmutableIterableIsParallelizable(coll.asInstanceOf[sci.Iterable[A]]).par
-//      case coll: scm.Iterable[_] => new MutableIterableIsParallelizable(coll.asInstanceOf[scm.Iterable[A]]).par
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, ParIterable[A]]].par
-//      case _ => ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray, same as for scm.Iterable
-//    }
-//  }
-//
-//  implicit class MutableIterableIsParallelizable[A](private val coll: scm.Iterable[A]) extends AnyVal with CustomParallelizable[A, mutable.ParIterable[A]] {
-//    def seq = coll
-//    override def par = coll match {
-//      case coll: scm.Seq[_] => new MutableSeqIsParallelizable(coll.asInstanceOf[scm.Seq[A]]).par
-//      case coll: scm.Set[_] => new MutableSetIsParallelizable(coll.asInstanceOf[scm.Set[A]]).par
+      case coll: sci.Iterable[A] => new ImmutableIterableIsParallelizable(coll).par
+      case coll: scm.Iterable[A] => new MutableIterableIsParallelizable(coll).par
+      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParIterable[A]]].par
+      case _ => ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray, same as for scm.Iterable
+    }
+  }
+
+  implicit class MutableIterableIsParallelizable[A](private val coll: scm.Iterable[A]) extends AnyVal with sc.CustomParallelizable[A, mutable.ParIterable[A]] {
+    def seq = coll
+    override def par = coll match {
+      case coll: scm.Seq[A] => new MutableSeqIsParallelizable(coll).par
+//      case coll: scm.Set[A] => new MutableSetIsParallelizable(coll.asInstanceOf[scm.Set[A]]).par
 //      case coll: scm.Map[_, _] => new MutableMapIsParallelizable(coll.asInstanceOf[scm.Map[_, _]]).par.asInstanceOf[mutable.ParIterable[A]]
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, mutable.ParIterable[A]]].par
-//      case _ => mutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray
-//    }
-//  }
-//
-//  implicit class ImmutableIterableIsParallelizable[A](private val coll: sci.Iterable[A]) extends AnyVal with CustomParallelizable[A, immutable.ParIterable[A]] {
-//    def seq = coll
-//    override def par = coll match {
-//      case coll: sci.Seq[_] => new ImmutableSeqIsParallelizable(coll.asInstanceOf[sci.Seq[A]]).par
-//      case coll: sci.Set[_] => new ImmutableSetIsParallelizable(coll.asInstanceOf[sci.Set[A]]).par
+      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, mutable.ParIterable[A]]].par
+      case _ => mutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray
+    }
+  }
+
+  implicit class ImmutableIterableIsParallelizable[A](private val coll: sci.Iterable[A]) extends AnyVal with sc.CustomParallelizable[A, immutable.ParIterable[A]] {
+    def seq = coll
+    override def par = coll match {
+      case coll: sci.Seq[A] => new ImmutableSeqIsParallelizable(coll).par
+//      case coll: sci.Set[A] => new ImmutableSetIsParallelizable(coll).par
 //      case coll: sci.Map[_, _] => new ImmutableMapIsParallelizable(coll.asInstanceOf[sci.Map[_, _]]).par.asInstanceOf[immutable.ParIterable[A]]
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, immutable.ParIterable[A]]].par
-//      case _ => immutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParVector
-//    }
-//  }
-//
-//  // mutable.Seq
-//
-//  implicit class MutableSeqIsParallelizable[A](private val coll: scm.Seq[A]) extends AnyVal with CustomParallelizable[A, mutable.ParSeq[A]] {
-//    def seq = coll
-//    override def par = coll match {
-//      case coll: scm.WrappedArray[_] => new WrappedArrayIsParallelizable(coll.asInstanceOf[scm.WrappedArray[A]]).par
-//      case coll: scm.ArraySeq[_] => new MutableArraySeqIsParallelizable(coll.asInstanceOf[scm.ArraySeq[A]]).par
-//      case coll: scm.ArrayBuffer[_] => new MutableArrayBufferIsParallelizable(coll.asInstanceOf[scm.ArrayBuffer[A]]).par
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, mutable.ParSeq[A]]].par
-//      case _ => mutable.ParSeq.newCombiner[A].fromSequential(seq)
-//    }
-//  }
-//
-//  implicit class WrappedArrayIsParallelizable[T](private val coll: scm.WrappedArray[T]) extends AnyVal with CustomParallelizable[T, mutable.ParArray[T]] {
-//    def seq = coll
-//    override def par = mutable.ParArray.handoff(coll.array)
-//  }
-//
-//  implicit class MutableArraySeqIsParallelizable[T](private val coll: scm.ArraySeq[T]) extends AnyVal with CustomParallelizable[T, mutable.ParArray[T]] {
-//    def seq = coll
-//    override def par = mutable.ParArray.handoff(coll.array.asInstanceOf[Array[T]], coll.length)
-//  }
-//
-//  implicit class MutableArrayBufferIsParallelizable[T](private val coll: scm.ArrayBuffer[T]) extends AnyVal with CustomParallelizable[T, mutable.ParArray[T]] {
-//    def seq = coll
-//    override def par = mutable.ParArray.handoff[T](coll.array.asInstanceOf[Array[T]], coll.size)
-//  }
-//
-//  // immutable.Seq
-//
-//  implicit class ImmutableSeqIsParallelizable[A](private val coll: sci.Seq[A]) extends AnyVal with CustomParallelizable[A, immutable.ParSeq[A]] {
-//    def seq = coll
-//    override def par = coll match {
-//      case coll: sci.Vector[_] => new VectorIsParallelizable(coll.asInstanceOf[sci.Vector[A]]).par
-//      case coll: sci.Range => new RangeIsParallelizable(coll).par.asInstanceOf[immutable.ParSeq[A]]
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, immutable.ParSeq[A]]].par
-//      case _ => immutable.ParSeq.newCombiner[A].fromSequential(seq)
-//    }
-//  }
-//
-//  implicit class RangeIsParallelizable(private val coll: sci.Range) extends AnyVal with CustomParallelizable[Int, immutable.ParRange] {
-//    def seq = coll
-//    override def par = new immutable.ParRange(coll)
-//  }
-//
-//  implicit class VectorIsParallelizable[T](private val coll: sci.Vector[T]) extends AnyVal with CustomParallelizable[T, immutable.ParVector[T]] {
-//    def seq = coll
-//    override def par = new immutable.ParVector(coll)
-//  }
-//
-//  // Set
-//
+      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, immutable.ParIterable[A]]].par
+      case _ => immutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParVector
+    }
+  }
+
+  // mutable.Seq
+
+  implicit class MutableSeqIsParallelizable[A](private val coll: scm.Seq[A]) extends AnyVal with sc.CustomParallelizable[A, mutable.ParSeq[A]] {
+    def seq = coll
+    override def par = coll match {
+      case coll: scm.ArraySeq[A] => new MutableArraySeqIsParallelizable(coll).par
+      case coll: scm.ArrayBuffer[A] => new MutableArrayBufferIsParallelizable(coll).par
+      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, mutable.ParSeq[A]]].par
+      case _ => mutable.ParSeq.newCombiner[A].fromSequential(seq)
+    }
+  }
+
+  implicit class MutableArraySeqIsParallelizable[T](private val coll: scm.ArraySeq[T]) extends AnyVal with sc.CustomParallelizable[T, mutable.ParArray[T]] {
+    def seq = coll
+    override def par = mutable.ParArray.handoff(coll.array.asInstanceOf[Array[T]], coll.length)
+  }
+
+  implicit class MutableArrayBufferIsParallelizable[T](private val coll: scm.ArrayBuffer[T]) extends AnyVal with sc.CustomParallelizable[T, mutable.ParArray[T]] {
+    def seq = coll
+    override def par = mutable.ParArray.handoff[T](coll.array.asInstanceOf[Array[T]], coll.size)
+  }
+
+  // immutable.Seq
+
+  implicit class ImmutableSeqIsParallelizable[A](private val coll: sci.Seq[A]) extends AnyVal with sc.CustomParallelizable[A, immutable.ParSeq[A]] {
+    def seq = coll
+    override def par = coll match {
+      case coll: sci.Vector[_] => new VectorIsParallelizable(coll.asInstanceOf[sci.Vector[A]]).par
+      case coll: sci.Range => new RangeIsParallelizable(coll).par.asInstanceOf[immutable.ParSeq[A]]
+      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, immutable.ParSeq[A]]].par
+      case _ => immutable.ParSeq.newCombiner[A].fromSequential(seq)
+    }
+  }
+
+  implicit class RangeIsParallelizable(private val coll: sci.Range) extends AnyVal with sc.CustomParallelizable[Int, immutable.ParRange] {
+    def seq = coll
+    override def par = new immutable.ParRange(coll)
+  }
+
+  implicit class VectorIsParallelizable[T](private val coll: sci.Vector[T]) extends AnyVal with sc.CustomParallelizable[T, immutable.ParVector[T]] {
+    def seq = coll
+    override def par = new immutable.ParVector(coll)
+  }
+
+  // Set
+
 //  implicit class SetIsParallelizable[A](private val coll: sc.Set[A]) extends AnyVal with CustomParallelizable[A, ParSet[A]] {
 //    def seq = coll
 //    override def par = coll match {
@@ -146,9 +138,9 @@ package scala.collection.parallel
 //    def seq = coll
 //    override def par = immutable.ParHashSet.fromTrie(coll)
 //  }
-//
-//  // Map
-//
+
+  // Map
+
 //  implicit class MapIsParallelizable[K, V](private val coll: sc.Map[K, V]) extends AnyVal with CustomParallelizable[(K, V), ParMap[K, V]] {
 //    def seq = coll
 //    override def par = coll match {
@@ -192,41 +184,41 @@ package scala.collection.parallel
 //    def seq = coll
 //    override def par = new mutable.ParTrieMap(coll)
 //  }
-//
-//  // Other
-//
-//  implicit class ArrayIsParallelizable[T](private val a: Array[T]) extends AnyVal with CustomParallelizable[T, mutable.ParArray[T]] {
-//    def seq = a // via ArrayOps
-//    override def par = mutable.ParArray.handoff(a)
+
+  // Other
+
+  implicit class ArrayIsParallelizable[T](private val a: Array[T]) extends AnyVal with sc.CustomParallelizable[T, mutable.ParArray[T]] {
+    def seq = a // via ArrayOps
+    override def par = mutable.ParArray.handoff(a)
+  }
+}
+
+trait CollectionConvertersLowPriority { self: CollectionConverters.type =>
+
+  // Generic
+  // TODO Use IsSeqLike, IsIterableLike, etc.
+
+//  implicit def iterableIsParallelizable[A](coll: sc.Iterable[A]): sc.Parallelizable[A, ParIterable[A]] = coll match {
+//    case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParIterable[A]]].par
+//    case _ => new IterableIsParallelizable(coll)
 //  }
-//}
-//
-//trait CollectionConvertersLowPriority { self: CollectionConverters.type =>
-//
-//  // Generic
-//
-//  implicit def genTraversableLikeIsParallelizable[A, Repr](coll: sc.GenTraversableLike[A, Repr]): Parallelizable[A, ParIterable[A]] = coll match {
-//    case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, ParIterable[A]]].par
-//    case coll: sc.Traversable[_] => new TraversableIsParallelizable(coll.asInstanceOf[sc.Traversable[A]])
-//    case coll => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenTraversableLike must be Parallelizable or a scala.collection.Traversable")
-//  }
-//
-//  implicit def genSeqLikeIsParallelizable[A, Repr](coll: sc.GenSeqLike[A, Repr]): Parallelizable[A, ParSeq[A]] = coll match {
-//    case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, ParSeq[A]]].par
-//    case it: scm.Seq[_] => new MutableSeqIsParallelizable(it.asInstanceOf[scm.Seq[A]])
-//    case it: sci.Seq[_] => new ImmutableSeqIsParallelizable(it.asInstanceOf[sci.Seq[A]])
-//    case coll => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenSeqLike must be Parallelizable or a scala.collection.mutable.Seq or scala.collection.immutable.Seq")
-//  }
-//
-//  implicit def genSetLikeIsParallelizable[A, Repr](coll: sc.GenSetLike[A, Repr]): Parallelizable[A, ParSet[A]] = coll match {
+
+  implicit def seqIsParallelizable[A](coll: sc.Seq[A]): sc.Parallelizable[A, ParSeq[A]] = coll match {
+    case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParSeq[A]]].par
+    case it: scm.Seq[A] => new MutableSeqIsParallelizable(it)
+    case it: sci.Seq[A] => new ImmutableSeqIsParallelizable(it)
+    case _ => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenSeqLike must be Parallelizable or a scala.collection.mutable.Seq or scala.collection.immutable.Seq")
+  }
+
+//  implicit def genSetLikeIsParallelizable[A, Repr](coll: sc.Set[A]): Parallelizable[A, ParSet[A]] = coll match {
 //    case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, ParSet[A]]].par
 //    case it: sc.Set[_] => new SetIsParallelizable(it.asInstanceOf[sc.Set[A]])
 //    case coll => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenSetLike must be Parallelizable or a scala.collection.Set")
 //  }
 //
-//  implicit def genMapLikeIsParallelizable[K, V, Repr](coll: sc.GenMapLike[K, V, Repr]): Parallelizable[(K, V), ParMap[K, V]] = coll match {
+//  implicit def genMapLikeIsParallelizable[K, V, Repr](coll: sc.Map[K, V]): Parallelizable[(K, V), ParMap[K, V]] = coll match {
 //    case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[(K, V), ParMap[K, V]]].par
 //    case it: sc.Map[_, _] => new MapIsParallelizable(it.asInstanceOf[sc.Map[K, V]])
 //    case coll => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenMapLike must be Parallelizable or a scala.collection.Map")
 //  }
-//}
+}

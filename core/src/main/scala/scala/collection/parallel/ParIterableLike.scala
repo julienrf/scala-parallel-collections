@@ -828,16 +828,18 @@ self =>
 
   /*override*/ def toIndexedSeq: scala.collection.immutable.IndexedSeq[T] = seq.toIndexedSeq
 
-//  override def toStream: Stream[T] = seq.toStream
+  @deprecated("Use `to(LazyList)` instead.", "0.1.3")
+  /*override*/ def toStream: Stream[T] = seq.toStream
 
   /*override*/ def toIterator: Iterator[T] = splitter
 
   // the methods below are overridden
 
   /*override*/ def toBuffer[U >: T]: scala.collection.mutable.Buffer[U] = seq.toBuffer // have additional, parallel buffers?
-/*
-  override def toTraversable: GenTraversable[T] = this.asInstanceOf[GenTraversable[T]]
-*/
+
+  @deprecated("Use `toIterable` instead", "0.1.3")
+  /*override*/ def toTraversable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
+
   /*override*/ def toIterable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
 
   def toSeq: ParSeq[T] = toParCollection[T, ParSeq[T]](() => ParSeq.newCombiner[T])
@@ -845,13 +847,11 @@ self =>
   override def toSet[U >: T]: immutable.ParSet[U] = toParCollection[U, immutable.ParSet[U]](() => immutable.ParSet.newCombiner[U])
 
   override def toMap[K, V](implicit ev: T <:< (K, V)): immutable.ParMap[K, V] = toParMap[K, V, immutable.ParMap[K, V]](() => immutable.ParMap.newCombiner[K, V])
-
-  override def toVector: Vector[T] = to[Vector]
-
-  override def to[Col[_]](implicit cbf: OldCanBuildFrom[Nothing, T, Col[T @uncheckedVariance]]): Col[T @uncheckedVariance] = if (cbf().isCombiner) {
-    toParCollection[T, Col[T]](() => cbf().asCombiner)
-  } else seq.to(cbf)
 */
+  /*override*/ def toVector: Vector[T] = to(Vector)
+
+  /*override*/ def to[C](factory: collection.Factory[T, C]): C = factory.fromSpecific(this)
+
   /* tasks */
 
   protected trait StrictSplitterCheckTask[R, Tp] extends Task[R, Tp] {
