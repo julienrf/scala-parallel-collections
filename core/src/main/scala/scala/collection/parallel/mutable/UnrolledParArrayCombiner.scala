@@ -13,9 +13,8 @@
 package scala
 package collection.parallel.mutable
 
-import scala.collection.mutable
 import scala.collection.mutable.ArraySeq
-//import scala.collection.mutable.DoublingUnrolledBuffer
+import scala.collection.mutable.DoublingUnrolledBuffer
 import scala.collection.mutable.UnrolledBuffer.Unrolled
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.Task
@@ -25,7 +24,7 @@ trait UnrolledParArrayCombiner[T]
 extends Combiner[T, ParArray[T]] {
 //self: EnvironmentPassingCombiner[T, ParArray[T]] =>
   // because size is doubling, random access is O(logn)!
-  val buff = new mutable.UnrolledBuffer[Any] // new DoublingUnrolledBuffer[Any]
+  val buff = new DoublingUnrolledBuffer[Any]
 
   def addOne(elem: T) = {
     buff += elem
