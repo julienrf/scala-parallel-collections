@@ -15,7 +15,7 @@ package collection.parallel
 
 //import scala.collection.GenIterable
 import scala.collection.generic._
-//import scala.collection.parallel.mutable.ParArrayCombiner
+import scala.collection.parallel.mutable.ParArrayCombiner
 
 /** A template trait for parallel iterable collections.
  *
@@ -41,8 +41,8 @@ trait ParIterable[+T]
  */
 object ParIterable extends ParFactory[ParIterable] {
 
-  def newBuilder[T]: Combiner[T, ParIterable[T]] = immutable.ParVector.newBuilder /*ParArrayCombiner[T]*/
+  def newBuilder[T]: Combiner[T, ParIterable[T]] = ParArrayCombiner[T]
 
-  def newCombiner[T]: Combiner[T, ParIterable[T]] = immutable.ParVector.newCombiner /*ParArrayCombiner[T]*/
+  def newCombiner[T]: Combiner[T, ParIterable[T]] = ParArrayCombiner[T]
 }
 

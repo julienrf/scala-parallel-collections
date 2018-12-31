@@ -14,7 +14,6 @@ package scala
 package collection.parallel.mutable
 
 import scala.collection.generic.GenericParTemplate
-//import scala.collection.generic.GenericCompanion
 import scala.collection.generic.GenericParCompanion
 //import scala.collection.generic.CanCombineFrom
 import scala.collection.generic.ParFactory

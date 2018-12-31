@@ -89,15 +89,6 @@ private[collection] trait AugmentedIterableIterator[+T] extends RemainsIterator[
     r
   }
 
-//  override def copyToArray[U >: T](array: Array[U], from: Int, len: Int): Unit = {
-//    var i = from
-//    val until = from + len
-//    while (i < until && hasNext) {
-//      array(i) = next()
-//      i += 1
-//    }
-//  }
-
   def reduceLeft[U >: T](howmany: Int, op: (U, U) => U): U = {
     var i = howmany - 1
     var u: U = next()
@@ -652,12 +643,12 @@ self =>
 
   override def zipAllParSeq[S, U >: T, R >: S](that: SeqSplitter[S], thisElem: U, thatElem: R) = new ZippedAll[U, R](that, thisElem, thatElem)
 
-//  def reverse: SeqSplitter[T] = {
-//    val pa = mutable.ParArray.fromTraversables(self).reverse
-//    new pa.ParArrayIterator {
-//      override def reverse = self
-//    }
-//  }
+  def reverse: SeqSplitter[T] = {
+    val pa = mutable.ParArray.fromIterables(self).reverse
+    new pa.ParArrayIterator {
+      override def reverse = self
+    }
+  }
 
   class Patched[U >: T](from: Int, patch: SeqSplitter[U], replaced: Int) extends SeqSplitter[U] {
     signalDelegate = self.signalDelegate

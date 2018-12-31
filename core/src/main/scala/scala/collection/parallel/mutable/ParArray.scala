@@ -372,10 +372,11 @@ self =>
       pos
     }
 
-    /*override*/ def sameElements(that: Iterator[_]): Boolean = {
+    override def sameElements[B >: T](that: IterableOnce[B]): Boolean = {
       var same = true
-      while (i < until && that.hasNext) {
-        if (arr(i) != that.next) {
+      val thatIt = that.iterator
+      while (i < until && thatIt.hasNext) {
+        if (arr(i) != thatIt.next) {
           i = until
           same = false
         }

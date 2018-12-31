@@ -7,9 +7,10 @@ import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.mutable.Builder
 import scala.collection.parallel.ParIterable
 
-// TODO inline in GenericParTempalte
+// TODO inline in GenericParTemplate or ParIterable
 trait GenericTraversableTemplate[+A, +CC[X] /*<: GenTraversable[X]*/] extends HasNewBuilder[A, CC[A] @uncheckedVariance] {
 
+  /** A sequential collection containing the same elements as this collection */
   def seq: Iterable[A]
 
   /** Applies a function `f` to all elements of this $coll.

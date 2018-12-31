@@ -13,13 +13,12 @@
 package scala
 package collection.parallel
 
-//import scala.collection.generic.GenericCompanion
 import scala.collection.generic.GenericParCompanion
 import scala.collection.generic.GenericParTemplate
 import scala.collection.generic.ParFactory
 //import scala.collection.generic.CanCombineFrom
 //import scala.collection.GenSeq
-//import scala.collection.parallel.mutable.ParArrayCombiner
+import scala.collection.parallel.mutable.ParArrayCombiner
 
 /** A template trait for parallel sequences.
  *
@@ -50,6 +49,6 @@ trait ParSeq[+T] extends /*GenSeq[T]
 object ParSeq extends ParFactory[ParSeq] {
 //  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParSeq[T]] = new GenericCanCombineFrom[T]
 
-  def newBuilder[T]: Combiner[T, ParSeq[T]] = immutable.ParVector.newBuilder /*ParArrayCombiner[T]*/
-  def newCombiner[T]: Combiner[T, ParSeq[T]] = immutable.ParVector.newCombiner /*ParArrayCombiner[T]*/
+  def newBuilder[T]: Combiner[T, ParSeq[T]] = ParArrayCombiner[T]
+  def newCombiner[T]: Combiner[T, ParSeq[T]] = ParArrayCombiner[T]
 }

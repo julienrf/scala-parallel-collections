@@ -28,9 +28,6 @@ import scala.language.higherKinds
  */
 trait GenericParCompanion[+CC[X] <: ParIterable[X]] {
 
-  /** The underlying collection type with unknown element type */
-  protected[this] type Coll = CC[_]
-
   /** An empty collection of type `$Coll[A]`
     *  @tparam A      the type of the ${coll}'s elements
     */
