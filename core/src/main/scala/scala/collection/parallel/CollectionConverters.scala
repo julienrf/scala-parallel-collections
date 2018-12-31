@@ -19,7 +19,8 @@ import scala.collection.{mutable => scm, immutable => sci/*, concurrent => scc*/
 /** Extension methods for `.par` on sequential collections. */
 object CollectionConverters extends CollectionConvertersLowPriority {
 
-  // Traversable & Iterable
+  // TODO Use IsSeqLike, IsIterableLike, etc.
+  // Iterable
 
   implicit class IterableIsParallelizable[A](private val coll: sc.Iterable[A]) extends AnyVal with sc.CustomParallelizable[A, ParIterable[A]] {
     def seq = coll
@@ -55,7 +56,12 @@ object CollectionConverters extends CollectionConvertersLowPriority {
     }
   }
 
-  // mutable.Seq
+  // Seq
+  implicit def seqIsParallelizable[A](coll: sc.Seq[A]): sc.Parallelizable[A, ParSeq[A]] = coll match {
+    case it: scm.Seq[A] => new MutableSeqIsParallelizable(it)
+    case it: sci.Seq[A] => new ImmutableSeqIsParallelizable(it)
+    case _ => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.Seq must be a scala.collection.mutable.Seq or scala.collection.immutable.Seq")
+  }
 
   implicit class MutableSeqIsParallelizable[A](private val coll: scm.Seq[A]) extends AnyVal with sc.CustomParallelizable[A, mutable.ParSeq[A]] {
     def seq = coll
@@ -84,7 +90,6 @@ object CollectionConverters extends CollectionConvertersLowPriority {
     override def par = coll match {
       case coll: sci.Vector[_] => new VectorIsParallelizable(coll.asInstanceOf[sci.Vector[A]]).par
       case coll: sci.Range => new RangeIsParallelizable(coll).par.asInstanceOf[immutable.ParSeq[A]]
-      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, immutable.ParSeq[A]]].par
       case _ => immutable.ParSeq.newCombiner[A].fromSequential(seq)
     }
   }
@@ -196,19 +201,6 @@ object CollectionConverters extends CollectionConvertersLowPriority {
 trait CollectionConvertersLowPriority { self: CollectionConverters.type =>
 
   // Generic
-  // TODO Use IsSeqLike, IsIterableLike, etc.
-
-//  implicit def iterableIsParallelizable[A](coll: sc.Iterable[A]): sc.Parallelizable[A, ParIterable[A]] = coll match {
-//    case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParIterable[A]]].par
-//    case _ => new IterableIsParallelizable(coll)
-//  }
-
-  implicit def seqIsParallelizable[A](coll: sc.Seq[A]): sc.Parallelizable[A, ParSeq[A]] = coll match {
-    case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParSeq[A]]].par
-    case it: scm.Seq[A] => new MutableSeqIsParallelizable(it)
-    case it: sci.Seq[A] => new ImmutableSeqIsParallelizable(it)
-    case _ => throw new IllegalArgumentException("Unexpected type "+coll.getClass.getName+" - every scala.collection.GenSeqLike must be Parallelizable or a scala.collection.mutable.Seq or scala.collection.immutable.Seq")
-  }
 
 //  implicit def genSetLikeIsParallelizable[A, Repr](coll: sc.Set[A]): Parallelizable[A, ParSet[A]] = coll match {
 //    case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[A, ParSet[A]]].par

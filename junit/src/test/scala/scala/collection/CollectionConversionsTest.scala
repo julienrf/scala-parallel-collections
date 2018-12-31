@@ -112,4 +112,31 @@ class CollectionConversionsTest {
     }
   }
 
+  // Tests checking that implicit conversions are correctly triggered for various types of collections
+  def testImplicitConverters(): Unit = {
+    import scala.{collection => sc}
+    import scala.collection.{mutable => scm, immutable => sci}
+
+    import scala.collection.parallel.CollectionConverters._
+
+    val xs1 = sc.Iterable(1, 2, 3).par
+    val xs1T: sc.parallel.ParIterable[Int] = xs1
+    val xs2 = sc.Seq(1, 2, 3).par
+    val xs2T: sc.parallel.ParSeq[Int] = xs2
+    val xs3 = scala.Seq(1, 2, 3).par
+    val xs3T: sc.parallel.immutable.ParSeq[Int] = xs3
+    val xs4 = sci.Seq(1, 2, 3).par
+    val xs4T: sc.parallel.immutable.ParSeq[Int] = xs4
+    val xs5 = List(1, 2, 3).par
+    val xs5T: sc.parallel.immutable.ParSeq[Int] = xs5
+    val xs6 = Vector(1, 2, 3).par
+    val xs6T: sc.parallel.immutable.ParVector[Int] = xs6
+    val xs7 = scm.Seq(1, 2, 3).par
+    val xs7T: sc.parallel.mutable.ParSeq[Int] = xs7
+    val xs8 = scm.ArrayBuffer(1, 2, 3).par
+    val xs8T: sc.parallel.mutable.ParArray[Int] = xs8
+    val xs9 = Array(1, 2, 3).par
+    val xs9T: sc.parallel.mutable.ParArray[Int] = xs9
+  }
+
 }
