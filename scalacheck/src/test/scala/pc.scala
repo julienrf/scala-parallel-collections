@@ -23,7 +23,7 @@ package scala {
 //      include(new immutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel immutable hash sets (tries)
-//      include(new immutable.IntParallelHashSetCheck(support) {})
+      include(new immutable.IntParallelHashSetCheck(support) {})
     
       // parallel mutable hash maps (tables)
 //      include(new mutable.IntIntParallelHashMapCheck(support) {})
