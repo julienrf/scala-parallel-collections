@@ -349,8 +349,6 @@ self =>
 
   override def toString = seq.mkString(stringPrefix + "(", ", ", ")")
 
-  def canEqual(other: Any) = true
-
   /** Reduces the elements of this sequence using the specified associative binary operator.
    *
    *  $undefinedorder
@@ -843,9 +841,9 @@ self =>
   /*override*/ def toIterable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
 
   def toSeq: ParSeq[T] = toParCollection[T, ParSeq[T]](() => ParSeq.newCombiner[T])
-/*
-  override def toSet[U >: T]: immutable.ParSet[U] = toParCollection[U, immutable.ParSet[U]](() => immutable.ParSet.newCombiner[U])
 
+  def toSet[U >: T]: /*immutable.*/ParSet[U] = toParCollection[U, /*immutable.*/ParSet[U]](() => /*immutable.*/ParSet.newCombiner[U])
+/*
   override def toMap[K, V](implicit ev: T <:< (K, V)): immutable.ParMap[K, V] = toParMap[K, V, immutable.ParMap[K, V]](() => immutable.ParMap.newCombiner[K, V])
 */
   /*override*/ def toVector: Vector[T] = to(Vector)
@@ -1463,13 +1461,7 @@ self =>
     debugBuffer += s
   }
 
-  private def buildString(closure: (Any => Unit) => Unit): String = {
-    var output = ""
-    closure(output += _.toString + "\n")
-
-    output
-  }
-
+  import scala.collection.DebugUtils._
   private[parallel] def printDebugBuffer() = println(buildString {
     append =>
     for (s <- debugBuffer) {

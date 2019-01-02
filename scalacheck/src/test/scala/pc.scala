@@ -32,7 +32,7 @@ package scala {
 //      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})
     
       // parallel mutable hash sets (tables)
-//      include(new mutable.IntParallelHashSetCheck(support) {})
+      include(new mutable.IntParallelHashSetCheck(support) {})
     
       // parallel vectors
       include(new immutable.IntParallelVectorCheck(support) {})

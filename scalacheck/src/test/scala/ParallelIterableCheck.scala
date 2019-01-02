@@ -70,12 +70,10 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
   def areEqual(t1: Iterable[T], t2: ParIterable[T]) = if (hasStrictOrder) {
     t1.iterator.sameElements(t2) && t2.sameElements(t1)
   } else (t1, t2) match { // it is slightly delicate what `equal` means if the order is not strict
-// TODO uncomment and update that part of the implementation when ParMap and ParSet are migrated
+// TODO uncomment and update that part of the implementation when ParMap is migrated
 //    case (m1: Map[_, _], m2: ParMap[_, _]) => m1 == m2 && m2 == m1
-//    case (i1: GenIterable[_], i2: GenIterable[_]) =>
-//      val i1s = i1.toSet
-//      val i2s = i2.toSet
-//      i1s == i2s && i2s == i1s
+    case (i1: Set[T], i2: ParSet[T]) =>
+      i1.forall(i2) && i2.forall(i1)
     case _ => t1.iterator.sameElements(t2) && t2.sameElements(t1)
   }
 
@@ -208,7 +206,7 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
       val tf = t.filter(p)
       val cf = coll.filter(p)
       val invs = checkDataStructureInvariants(tf, cf)
-      if (!tf.iterator.sameElements(cf) || !cf.sameElements(tf) || !invs) {
+      if (!areEqual(tf, cf) || !invs) {
         printDebugInfo(coll)
         println("Operator: " + ind)
         println("sz: " + t.size)
@@ -223,12 +221,11 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
         println
         println(tf)
         println
-        println("tf sameElements cf - " + (tf.iterator.sameElements(cf)))
-        println("cf sameElements tf - " + (cf.sameElements(tf)))
+        println("areEqual(tf, cf) - " + areEqual(tf, cf))
         printDataStructureDebugInfo(cf)
         println("valid: " + invs)
       }
-      ("op index: " + ind) |: (tf.iterator.sameElements(cf) && cf.sameElements(tf) && invs)
+      ("op index: " + ind) |: (areEqual(tf, cf) && invs)
     }).reduceLeft(_ && _)
   }
 
@@ -236,8 +233,8 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
     (for ((p, ind) <- filterNotPredicates.zipWithIndex) yield {
       val tf = t.filterNot(p)
       val cf = coll.filterNot(p)
-      if (!tf.iterator.sameElements(cf) || !cf.sameElements(tf)) printComparison(t, coll, tf, cf, ind)
-      ("op index: " + ind) |: tf.iterator.sameElements(cf) && cf.sameElements(tf)
+      if (!areEqual(tf, cf)) printComparison(t, coll, tf, cf, ind)
+      ("op index: " + ind) |: areEqual(tf, cf)
     }).reduceLeft(_ && _)
   }
 
@@ -245,13 +242,13 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
     (for ((p, ind) <- partitionPredicates.zipWithIndex) yield {
       val tpart @ (tpart1, tpart2) = t.partition(p)
       val cpart @ (cpart1, cpart2) = coll.partition(p)
-      if (!tpart1.iterator.sameElements(cpart1) || !tpart2.iterator.sameElements(cpart2)) {
+      if (!areEqual(tpart1, cpart1) || !areEqual(tpart2, cpart2)) {
         println("from: " + t)
         println("and: " + coll)
         println(cpart)
         println(tpart)
       }
-      ("op index: " + ind) |: (tpart1.iterator.sameElements(cpart1) && tpart2.iterator.sameElements(cpart2))
+      ("op index: " + ind) |: (areEqual(tpart1, cpart1) && areEqual(tpart2, cpart2))
     }).reduceLeft(_ && _)
   }
 

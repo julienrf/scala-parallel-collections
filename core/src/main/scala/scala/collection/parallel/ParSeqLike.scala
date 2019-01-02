@@ -52,14 +52,15 @@ import scala.collection.parallel.ParallelCollectionImplicits._
  */
 trait ParSeqLike[+T, +CC[X] <: ParSeq[X], +Repr <: ParSeq[T], +Sequential <: scala.collection.Seq[T] with SeqOps[T, AnyConstr, Sequential]]
 extends /*scala.collection.GenSeqLike[T, Repr]
-   with*/ ParIterableLike[T, CC, Repr, Sequential] {
+   with*/ ParIterableLike[T, CC, Repr, Sequential]
+   with Equals {
 self =>
 
   // Members previously inherited from scala.collection.GenSeqLike
   def length: Int
   def apply(index: Int): T
 
-  override def hashCode()= scala.util.hashing.MurmurHash3.orderedHash(seq, "ParSeq".hashCode)
+  override def hashCode() = scala.util.hashing.MurmurHash3.orderedHash(this, "ParSeq".hashCode)
 
   /** The equals method for arbitrary parallel sequences. Compares this
     * parallel sequence to some other object.
@@ -71,6 +72,8 @@ self =>
     case that: ParSeq[_] => (that eq this.asInstanceOf[AnyRef]) || (that canEqual this) && (this sameElements that)
     case _               => false
   }
+
+  def canEqual(other: Any): Boolean = true
   //---
 
 
