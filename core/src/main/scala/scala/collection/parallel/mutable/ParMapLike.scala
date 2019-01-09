@@ -51,4 +51,6 @@ extends /*scala.collection.GenMapLike[K, V, Repr]
 //  def -(key: K) = this.clone() -= key
 
   def clear(): Unit
+
+  override def clone(): Repr = empty ++= this
 }

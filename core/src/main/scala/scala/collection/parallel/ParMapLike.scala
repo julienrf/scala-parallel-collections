@@ -41,11 +41,46 @@ trait ParMapLike[K,
                  +Sequential <: Map[K, V] with MapOps[K, V, Map, Sequential]]
 extends /*GenMapLike[K, V, Repr]
    with*/ ParIterableLike[(K, V), ParIterable, Repr, Sequential]
+  with Equals
 {
 self =>
 
   // --- Previously inherited from GenMapLike
   def get(key: K): Option[V]
+
+  def canEqual(that: Any): Boolean = true
+
+  /** Compares two maps structurally; i.e., checks if all mappings
+    *  contained in this map are also contained in the other map,
+    *  and vice versa.
+    *
+    *  @param that the other map
+    *  @return     `true` if both maps contain exactly the
+    *              same mappings, `false` otherwise.
+    */
+  override def equals(that: Any): Boolean = that match {
+    case that: ParMap[b, _] =>
+      (this eq that) ||
+        (that canEqual this) &&
+          (this.size == that.size) && {
+          try {
+            this forall {
+              case (k, v) => that.get(k.asInstanceOf[b]) match {
+                case Some(`v`) =>
+                  true
+                case _ => false
+              }
+            }
+          } catch {
+            case ex: ClassCastException => false
+          }}
+    case _ =>
+      false
+  }
+
+  // This hash code must be symmetric in the contents but ought not
+  // collide trivially.
+  override def hashCode(): Int = scala.util.hashing.MurmurHash3.unorderedHash(this, "ParMap".hashCode)
   // ---
 
   def mapCompanion: GenericParMapCompanion[CC]

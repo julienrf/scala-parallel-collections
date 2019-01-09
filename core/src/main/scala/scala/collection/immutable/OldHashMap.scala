@@ -62,11 +62,11 @@ sealed abstract class OldHashMap[K, +V]
     */
   def merged[V1 >: V](that: OldHashMap[K, V1])(mergef: MergeFunction[K, V1]): OldHashMap[K, V1] = merge0(that, 0, liftMerger(mergef))
 
-  protected def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1]
+  protected[collection] def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1]
 
   protected def removed0(key: K, hash: Int, level: Int): OldHashMap[K, V]
 
-  protected def get0(key: K, hash: Int, level: Int): Option[V]
+  protected[collection] def get0(key: K, hash: Int, level: Int): Option[V]
 
   protected def merge0[V1 >: V](that: OldHashMap[K, V1], level: Int, merger: Merger[K, V1]): OldHashMap[K, V1]
 
@@ -176,12 +176,12 @@ object OldHashMap extends MapFactory[OldHashMap] {
 
     override def isEmpty: Boolean = true
     override def knownSize: Int = 0
-    protected def updated0[V1 >: Nothing](key: Any, hash: Int, level: Int, value: V1, kv: (Any, V1), merger: Merger[Any, V1]): OldHashMap[Any, V1] =
+    protected[collection] def updated0[V1 >: Nothing](key: Any, hash: Int, level: Int, value: V1, kv: (Any, V1), merger: Merger[Any, V1]): OldHashMap[Any, V1] =
       new OldHashMap.OldHashMap1(key, hash, value, kv)
 
     protected def removed0(key: Any, hash: Int, level: Int): OldHashMap[Any, Nothing] = this
 
-    protected def get0(key: Any, hash: Int, level: Int): Option[Nothing] = None
+    protected[collection] def get0(key: Any, hash: Int, level: Int): Option[Nothing] = None
 
     protected def filter0(p: ((Any, Nothing)) => Boolean, negate: Boolean, level: Int, buffer: Array[OldHashMap[Any, Nothing]], offset0: Int): OldHashMap[Any, Nothing] = null
 
@@ -209,7 +209,7 @@ object OldHashMap extends MapFactory[OldHashMap] {
     override def isEmpty: Boolean = false
     def iterator: Iterator[(K, V)] = Iterator.single(ensurePair)
 
-    def get0(key: K, hash: Int, level: Int): Option[V] =
+    protected[collection] def get0(key: K, hash: Int, level: Int): Option[V] =
       if (hash == this.hash && key == this.key) Some(value) else None
 
     override def size = 1
@@ -221,7 +221,7 @@ object OldHashMap extends MapFactory[OldHashMap] {
     protected def contains0(key: K, hash: Int, level: Int): Boolean =
       hash == this.hash && key == this.key
 
-    protected def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1] =
+    protected[collection] def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1] =
       if (hash == this.hash && key == this.key ) {
         if (merger eq null) {
           if (this.value.asInstanceOf[AnyRef] eq value.asInstanceOf[AnyRef]) this
@@ -263,13 +263,13 @@ object OldHashMap extends MapFactory[OldHashMap] {
 
     override def size: Int = kvs.size
     override def isEmpty: Boolean = false
-    protected def get0(key: K, hash: Int, level: Int): Option[V] =
+    protected[collection] def get0(key: K, hash: Int, level: Int): Option[V] =
       if (hash == this.hash) kvs.get(key) else None
 
     protected def contains0(key: K, hash: Int, level: Int): Boolean =
       hash == this.hash && kvs.contains(key)
 
-    protected override def updated0[B1 >: V](key: K, hash: Int, level: Int, value: B1, kv: (K, B1), merger: Merger[K, B1]): OldHashMap[K, B1] =
+    protected[collection] override def updated0[B1 >: V](key: K, hash: Int, level: Int, value: B1, kv: (K, B1), merger: Merger[K, B1]): OldHashMap[K, B1] =
       if (hash == this.hash) {
         if ((merger eq null) || !kvs.contains(key)) new OldHashMapCollision1(hash, kvs.updated(key, value))
         else new OldHashMapCollision1(hash, kvs + merger((key, kvs(key)), kv))
@@ -340,7 +340,7 @@ object OldHashMap extends MapFactory[OldHashMap] {
     override def size: Int = size0
     override def isEmpty: Boolean = false
     override def knownSize: Int = size
-    protected def get0(key: K, hash: Int, level: Int): Option[V] = {
+    protected[collection] def get0(key: K, hash: Int, level: Int): Option[V] = {
       // Note: this code is duplicated with `contains0`
       val index = (hash >>> level) & 0x1f
       if (bitmap == - 1) {
@@ -372,7 +372,7 @@ object OldHashMap extends MapFactory[OldHashMap] {
       }
     }
 
-    protected def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1] = {
+    protected[collection] def updated0[V1 >: V](key: K, hash: Int, level: Int, value: V1, kv: (K, V1), merger: Merger[K, V1]): OldHashMap[K, V1] = {
       val index = (hash >>> level) & 0x1f
       val mask = (1 << index)
       val offset = Integer.bitCount(bitmap & (mask - 1))

@@ -20,7 +20,7 @@ package scala {
       include(new immutable.ParallelRangeCheck(support) {})
     
       // parallel immutable hash maps (tries)
-//      include(new immutable.IntIntParallelHashMapCheck(support) {})
+      include(new immutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel immutable hash sets (tries)
       include(new immutable.IntParallelHashSetCheck(support) {})
