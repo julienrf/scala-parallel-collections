@@ -137,6 +137,7 @@ class CollectionConversionsTest {
     val xs8T: sc.parallel.mutable.ParArray[Int] = xs8
     val xs9 = Array(1, 2, 3).par
     val xs9T: sc.parallel.mutable.ParArray[Int] = xs9
+    // TODO Add conversions to Sets and Maps
   }
 
 }

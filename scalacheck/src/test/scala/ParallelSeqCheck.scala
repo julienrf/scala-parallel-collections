@@ -9,7 +9,8 @@ import org.scalacheck.Properties
 import scala.collection._
 import scala.collection.parallel._
 
-abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableCheck[T](collName) with SeqOperators[T] {
+abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableCheck[T](collName)
+  with SeqOperators[T] with SimpleValuesCheck[T] {
 
   type CollType <: collection.parallel.ParSeq[T]
 

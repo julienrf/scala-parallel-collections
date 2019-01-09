@@ -26,7 +26,7 @@ package scala {
       include(new immutable.IntParallelHashSetCheck(support) {})
     
       // parallel mutable hash maps (tables)
-//      include(new mutable.IntIntParallelHashMapCheck(support) {})
+      include(new mutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel ctrie
 //      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})

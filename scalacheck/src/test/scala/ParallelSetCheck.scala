@@ -9,7 +9,9 @@ import org.scalacheck.Properties
 import scala.collection._
 import scala.collection.parallel._
 
-abstract class ParallelSetCheck[T](collname: String) extends ParallelIterableCheck[T](collname) {
+abstract class ParallelSetCheck[T](collname: String) extends ParallelIterableCheck[T](collname)
+  with SimpleValuesCheck[T] {
+
   type CollType <: ParSet[T]
 
   property("gets iterated keys") = forAllNoShrink(collectionPairs) {

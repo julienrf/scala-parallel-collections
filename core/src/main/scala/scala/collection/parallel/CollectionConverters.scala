@@ -26,10 +26,9 @@ object CollectionConverters extends CollectionConvertersLowPriority {
     def seq = coll
     override def par = coll match {
 //      case coll: sc.Set[_] => new SetIsParallelizable(coll.asInstanceOf[sc.Set[A]]).par
-//      case coll: sc.Map[_, _] => new MapIsParallelizable(coll.asInstanceOf[sc.Map[_, _]]).par.asInstanceOf[ParIterable[A]]
+      case coll: sc.Map[_, _] => new MapIsParallelizable(coll).par.asInstanceOf[ParIterable[A]]
       case coll: sci.Iterable[A] => new ImmutableIterableIsParallelizable(coll).par
       case coll: scm.Iterable[A] => new MutableIterableIsParallelizable(coll).par
-      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, ParIterable[A]]].par
       case _ => ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray, same as for scm.Iterable
     }
   }
@@ -39,8 +38,7 @@ object CollectionConverters extends CollectionConvertersLowPriority {
     override def par = coll match {
       case coll: scm.Seq[A] => new MutableSeqIsParallelizable(coll).par
 //      case coll: scm.Set[A] => new MutableSetIsParallelizable(coll.asInstanceOf[scm.Set[A]]).par
-//      case coll: scm.Map[_, _] => new MutableMapIsParallelizable(coll.asInstanceOf[scm.Map[_, _]]).par.asInstanceOf[mutable.ParIterable[A]]
-      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, mutable.ParIterable[A]]].par
+      case coll: scm.Map[_, _] => new MutableMapIsParallelizable(coll).par.asInstanceOf[mutable.ParIterable[A]]
       case _ => mutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParArray
     }
   }
@@ -51,7 +49,6 @@ object CollectionConverters extends CollectionConvertersLowPriority {
       case coll: sci.Seq[A] => new ImmutableSeqIsParallelizable(coll).par
 //      case coll: sci.Set[A] => new ImmutableSetIsParallelizable(coll).par
 //      case coll: sci.Map[_, _] => new ImmutableMapIsParallelizable(coll.asInstanceOf[sci.Map[_, _]]).par.asInstanceOf[immutable.ParIterable[A]]
-      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, immutable.ParIterable[A]]].par
       case _ => immutable.ParIterable.newCombiner[A].fromSequential(seq) // builds ParVector
     }
   }
@@ -68,7 +65,6 @@ object CollectionConverters extends CollectionConvertersLowPriority {
     override def par = coll match {
       case coll: scm.ArraySeq[A] => new MutableArraySeqIsParallelizable(coll).par
       case coll: scm.ArrayBuffer[A] => new MutableArrayBufferIsParallelizable(coll).par
-      case coll: sc.Parallelizable[_, _] => coll.asInstanceOf[sc.Parallelizable[A, mutable.ParSeq[A]]].par
       case _ => mutable.ParSeq.newCombiner[A].fromSequential(seq)
     }
   }
@@ -146,16 +142,15 @@ object CollectionConverters extends CollectionConvertersLowPriority {
 
   // Map
 
-//  implicit class MapIsParallelizable[K, V](private val coll: sc.Map[K, V]) extends AnyVal with CustomParallelizable[(K, V), ParMap[K, V]] {
-//    def seq = coll
-//    override def par = coll match {
+  implicit class MapIsParallelizable[K, V](private val coll: sc.Map[K, V]) extends AnyVal with sc.CustomParallelizable[(K, V), ParMap[K, V]] {
+    def seq = coll
+    override def par = coll match {
 //      case coll: sci.Map[_, _] => new ImmutableMapIsParallelizable(coll.asInstanceOf[sci.Map[K, V]]).par
-//      case coll: scm.Map[_, _] => new MutableMapIsParallelizable(coll.asInstanceOf[scm.Map[K, V]]).par
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[(K, V), ParMap[K, V]]].par
-//      case _ => ParMap.newCombiner[K, V].fromSequential(seq)
-//    }
-//  }
-//
+      case coll: scm.Map[K, V] => new MutableMapIsParallelizable(coll).par
+      case _ => ParMap.newCombiner[K, V].fromSequential(seq)
+    }
+  }
+
 //  implicit class ImmutableMapIsParallelizable[K, V](private val coll: sci.Map[K, V]) extends AnyVal with CustomParallelizable[(K, V), immutable.ParMap[K, V]] {
 //    def seq = coll
 //    override def par = coll match {
@@ -165,26 +160,25 @@ object CollectionConverters extends CollectionConvertersLowPriority {
 //    }
 //  }
 //
-//  implicit class MutableMapIsParallelizable[K, V](private val coll: scm.Map[K, V]) extends AnyVal with CustomParallelizable[(K, V), mutable.ParMap[K, V]] {
-//    def seq = coll
-//    override def par = coll match {
-//      case coll: scm.HashMap[_, _] => new MutableHashMapIsParallelizable(coll.asInstanceOf[scm.HashMap[K, V]]).par
+  implicit class MutableMapIsParallelizable[K, V](private val coll: scm.Map[K, V]) extends AnyVal with sc.CustomParallelizable[(K, V), mutable.ParMap[K, V]] {
+    def seq = coll
+    override def par = coll match {
+      case coll: scm.HashMap[K, V] => new MutableHashMapIsParallelizable(coll).par
 //      case coll: scc.TrieMap[_, _] => new ConcurrentTrieMapIsParallelizable(coll.asInstanceOf[scc.TrieMap[K, V]]).par
-//      case coll: Parallelizable[_, _] => coll.asInstanceOf[Parallelizable[(K, V), mutable.ParMap[K, V]]].par
-//      case _ => mutable.ParMap.newCombiner[K, V].fromSequential(seq)
-//    }
-//  }
-//
+      case _ => mutable.ParMap.newCombiner[K, V].fromSequential(seq)
+    }
+  }
+
 //  implicit class ImmutableHashMapIsParallelizable[K, V](private val coll: sci.HashMap[K, V]) extends AnyVal with CustomParallelizable[(K, V), immutable.ParHashMap[K, V]] {
 //    def seq = coll
 //    override def par = immutable.ParHashMap.fromTrie(coll)
 //  }
 //
-//  implicit class MutableHashMapIsParallelizable[K, V](private val coll: scm.HashMap[K, V]) extends AnyVal with CustomParallelizable[(K, V), mutable.ParHashMap[K, V]] {
-//    def seq = coll
-//    override def par = new mutable.ParHashMap[K, V](coll.hashTableContents)
-//  }
-//
+  implicit class MutableHashMapIsParallelizable[K, V](private val coll: scm.HashMap[K, V]) extends AnyVal with sc.CustomParallelizable[(K, V), mutable.ParHashMap[K, V]] {
+    def seq = coll
+    override def par = coll.to(mutable.ParHashMap) // TODO Redesign ParHashMap such that conversion from sequential scm.HashMap takes constant time
+  }
+
 //  implicit class ConcurrentTrieMapIsParallelizable[K, V](private val coll: scc.TrieMap[K, V]) extends AnyVal with CustomParallelizable[(K, V), mutable.ParTrieMap[K, V]] {
 //    def seq = coll
 //    override def par = new mutable.ParTrieMap(coll)
