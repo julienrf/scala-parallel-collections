@@ -357,6 +357,26 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
 //      }).reduceLeft(_ && _)
 //  }
 
+  property("groupBy must be equal") = forAllNoShrink(collectionPairs) {
+    case (t, coll) =>
+      (for ((f, ind) <- groupByFunctions.zipWithIndex) yield {
+        val tgroup: scala.collection.Map[T, Iterable[T]] = t.groupBy(f)
+        val cgroup: scala.collection.parallel.ParMap[T, ParIterable[T]] = coll.groupBy(f)
+        val cgroupseq: scala.collection.parallel.ParMap[T, Iterable[T]] = cgroup.map { case (k, xs) => (k, xs.seq) }
+        val areMapsEqual =
+          tgroup.forall { case (k, v) => cgroupseq.get(k).contains(v) } &&
+            cgroupseq.forall { case (k, v) => tgroup.get(k).contains(v) }
+        if (!areMapsEqual) {
+          println("from: " + t)
+          println("and: " + coll)
+          println("groups are: ")
+          println(tgroup)
+          println(cgroupseq)
+        }
+        ("operator " + ind) |: areMapsEqual
+      }).reduceLeft(_ && _)
+  }
+
 }
 
 /**

@@ -18,7 +18,7 @@ import scala.collection.mutable.Builder
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.{CustomParallelizable, /*GenIterable, GenTraversable, GenTraversableOnce,*/ IterableOps, Parallel}
 import scala.collection.generic._
-//import immutable.HashMapCombiner
+import immutable.HashMapCombiner
 import scala.reflect.ClassTag
 //import scala.annotation.unchecked.uncheckedVariance
 //import scala.collection.parallel.ParallelCollectionImplicits._
@@ -617,12 +617,12 @@ self =>
     )
   }
 
-/*  def groupBy[K](f: T => K): immutable.ParMap[K, Repr] = {
+  def groupBy[K](f: T => K): immutable.ParMap[K, Repr] = {
     val r = tasksupport.executeAndWaitResult(new GroupBy(f, () => HashMapCombiner[K, T], splitter) mapResult {
       rcb => rcb.groupByKey(() => combinerFactory())
     })
     setTaskSupport(r, tasksupport)
-  }*/
+  }
 
   def take(n: Int): Repr = {
     val actualn = if (size > n) n else size
@@ -1108,7 +1108,7 @@ self =>
     override def merge(that: Partition[U, This]) = result = (result._1 combine that.result._1, result._2 combine that.result._2)
   }
 
-/*  protected[this] class GroupBy[K, U >: T](
+  protected[this] class GroupBy[K, U >: T](
     f: U => K,
     mcf: () => HashMapCombiner[K, U],
     protected[this] val pit: IterableSplitter[T]
@@ -1129,7 +1129,7 @@ self =>
       // --> we know we're not dropping any mappings
       result = (result combine that.result).asInstanceOf[HashMapCombiner[K, U]]
     }
-  }*/
+  }
 
   protected[this] class Take[U >: T, This >: Repr]
   (n: Int, cbf: CombinerFactory[U, This], protected[this] val pit: IterableSplitter[T])
