@@ -119,8 +119,10 @@ class CollectionConversionsTest {
 
     import scala.collection.parallel.CollectionConverters._
 
+    // Iterable
     val xs1 = sc.Iterable(1, 2, 3).par
     val xs1T: sc.parallel.ParIterable[Int] = xs1
+    // Seq
     val xs2 = sc.Seq(1, 2, 3).par
     val xs2T: sc.parallel.ParSeq[Int] = xs2
     val xs3 = scala.Seq(1, 2, 3).par
@@ -137,7 +139,21 @@ class CollectionConversionsTest {
     val xs8T: sc.parallel.mutable.ParArray[Int] = xs8
     val xs9 = Array(1, 2, 3).par
     val xs9T: sc.parallel.mutable.ParArray[Int] = xs9
-    // TODO Add conversions to Sets and Maps
+    // Set
+    val xs10 = sc.Set(1, 2, 3).par
+    val xs10T: sc.parallel.ParSet[Int] = xs10
+    val xs11 = sci.Set(1, 2, 3).par
+    val xs11T: sc.parallel.immutable.ParSet[Int] = xs11
+    val xs12 = scm.Set(1, 2, 3).par
+    val xs12T: sc.parallel.mutable.ParSet[Int] = xs12
+    // Map
+    val xs13 = sc.Map(1 -> 0, 2 -> 0).par
+    val xs13T: sc.parallel.ParMap[Int, Int] = xs13
+    val xs14 = sci.Map(1 -> 0, 2 -> 0).par
+    val xs14T: sc.parallel.immutable.ParMap[Int, Int] = xs14
+    val xs15 = scm.Map(1 -> 0, 2 -> 0).par
+    val xs15T: sc.parallel.mutable.ParMap[Int, Int] = xs15
+    // TODO concurrent.TrieMap
   }
 
 }

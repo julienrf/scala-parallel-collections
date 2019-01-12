@@ -15,7 +15,7 @@ package collection
 package generic
 
 import scala.collection.parallel.ParIterable
-import scala.language.{higherKinds, implicitConversions}
+import scala.language.higherKinds
 
 /** A template class for companion objects of `ParIterable` and subclasses
  *  thereof. This class extends `TraversableFactory` and provides a set of
@@ -218,8 +218,6 @@ extends GenericParCompanion[CC] {
     b.result()
   }
 
-  implicit def toFactory[A]: Factory[A, CC[A]] = ParFactory.toFactory(this)
-
   //type EPC[T, C] = scala.collection.parallel.EnvironmentPassingCombiner[T, C]
 /*
   /** A generic implementation of the `CanCombineFrom` trait, which forwards
@@ -230,23 +228,4 @@ extends GenericParCompanion[CC] {
     override def apply(from: Coll) = from.genericCombiner
     override def apply() = newBuilder[A]
   }*/
-}
-
-// TODO Specialize `Factory` with parallel collection creation methods so that the `xs.to(ParArray)` syntax
-// does build the resulting `ParArray` in parallel
-object ParFactory {
-  /**
-    * Implicit conversion for converting any `ParFactory` into a sequential `Factory`.
-    * This provides supports for the `to` conversion method (eg, `xs.to(ParArray)`).
-    */
-  implicit def toFactory[A, CC[X] <: ParIterable[X] with GenericParTemplate[X, CC]](parFactory: ParFactory[CC]): Factory[A, CC[A]] =
-    new ToFactory(parFactory)
-
-  @SerialVersionUID(3L)
-  private class ToFactory[A, CC[X] <: ParIterable[X] with GenericParTemplate[X, CC]](parFactory: ParFactory[CC])
-    extends Factory[A, CC[A]] with Serializable{
-      def fromSpecific(it: IterableOnce[A]): CC[A] = (parFactory.newBuilder[A] ++= it).result()
-      def newBuilder: mutable.Builder[A, CC[A]] = parFactory.newBuilder
-  }
-
 }
