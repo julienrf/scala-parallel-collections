@@ -7,6 +7,15 @@ import scala.annotation.unchecked.uncheckedVariance
 import scala.collection.mutable.Builder
 import scala.collection.parallel.ParIterable
 
+/** A template class for companion objects of ``regular`` collection classes
+ *  that represent an unconstrained higher-kinded type.
+ *
+ *  @tparam  A    The type of the collection elements.
+ *  @tparam  CC   The type constructor representing the collection class.
+ *  @author Martin Odersky
+ *  @since 2.8
+ *  @define coll  collection
+ */
 // TODO inline in GenericParTemplate or ParIterable
 trait GenericTraversableTemplate[+A, +CC[X] /*<: GenTraversable[X]*/] extends HasNewBuilder[A, CC[A] @uncheckedVariance] {
 

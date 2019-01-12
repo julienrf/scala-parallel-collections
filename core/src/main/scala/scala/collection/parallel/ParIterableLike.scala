@@ -16,7 +16,7 @@ package collection.parallel
 import scala.language.{ higherKinds, implicitConversions }
 import scala.collection.mutable.Builder
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.{CustomParallelizable, /*GenIterable, GenTraversable, GenTraversableOnce,*/ IterableOps, Parallel}
+import scala.collection.{CustomParallelizable, IterableOps, Parallel}
 import scala.collection.generic._
 import immutable.HashMapCombiner
 import scala.reflect.ClassTag
@@ -150,8 +150,7 @@ import scala.reflect.ClassTag
  *  @define coll parallel iterable
  */
 trait ParIterableLike[+T, +CC[X] <: ParIterable[X], +Repr <: ParIterable[T], +Sequential <: Iterable[T] with IterableOps[T, Iterable /* TODO */, Sequential]]
-extends /*GenIterableLike[T, Repr]
-   with*/ IterableOnce[T]
+extends IterableOnce[T]
    with CustomParallelizable[T, Repr]
    with Parallel
    with HasNewCombiner[T, Repr]
@@ -796,8 +795,18 @@ self =>
         (companion.newBuilder[(U, S)] ++= setTaskSupport(seq.zip(that.seq), tasksupport)).result()
     }
   }
+  def zip[U >: T, S](that: Iterable[S]): CC[(U, S)] =
+    (companion.newBuilder[(U, S)] ++= setTaskSupport(seq.zip(that), tasksupport)).result()
 
-//  def zipWithIndex[U >: T]: CC[(U, Int)] = this zip immutable.ParRange(0, size, 1, inclusive = false)
+
+  /** Zips this $coll with its indices.
+    *
+    *  @tparam  U    the type of the first half of the returned pairs (this is always a supertype
+    *                 of the collection's element type `T`).
+    *  @return        A new collection of type $Coll containing pairs consisting of all elements of this
+    *                 $coll paired with their index. Indices start at 0.
+    */
+  def zipWithIndex[U >: T]: CC[(U, Int)] = this zip immutable.ParRange(0, size, 1, inclusive = false)
 
   def zipAll[S, U >: T](that: ParIterable[S], thisElem: U, thatElem: S): CC[(U, S)] = {
     val thatseq = that.toSeq

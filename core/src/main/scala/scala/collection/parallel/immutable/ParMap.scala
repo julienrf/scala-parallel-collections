@@ -33,8 +33,7 @@ import scala.language.higherKinds
  *  @since 2.9
  */
 trait ParMap[K, +V]
-extends /*scala.collection/*.immutable*/.GenMap[K, V]
-   with*/ GenericParMapTemplate[K, V, ParMap]
+extends GenericParMapTemplate[K, V, ParMap]
    with parallel.ParMap[K, V]
    with ParIterable[(K, V)]
    with ParMapLike[K, V, ParMap, ParMap[K, V], scala.collection.immutable.Map[K, V]]
@@ -81,9 +80,9 @@ trait ParMapLike[
 
   def empty: Repr
 
-  /*override*/ def toMap[P, Q](implicit ev: (K, V) <:< (P, Q)): ParMap[P, Q] = this.asInstanceOf[ParMap[P, Q]]
+  def toMap[P, Q](implicit ev: (K, V) <:< (P, Q)): ParMap[P, Q] = this.asInstanceOf[ParMap[P, Q]]
 
-  /*override*/ def updated [U >: V](key: K, value: U): CC[K, U] = this + ((key, value))
+  override def updated [U >: V](key: K, value: U): CC[K, U] = this + ((key, value))
 
   def + [U >: V](kv: (K, U)): CC[K, U]
 

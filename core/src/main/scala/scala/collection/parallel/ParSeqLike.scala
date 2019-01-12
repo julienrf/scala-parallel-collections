@@ -51,12 +51,10 @@ import scala.collection.parallel.ParallelCollectionImplicits._
  *  @since 2.9
  */
 trait ParSeqLike[+T, +CC[X] <: ParSeq[X], +Repr <: ParSeq[T], +Sequential <: scala.collection.Seq[T] with SeqOps[T, AnyConstr, Sequential]]
-extends /*scala.collection.GenSeqLike[T, Repr]
-   with*/ ParIterableLike[T, CC, Repr, Sequential]
+extends ParIterableLike[T, CC, Repr, Sequential]
    with Equals {
 self =>
 
-  // Members previously inherited from scala.collection.GenSeqLike
   def length: Int
   def apply(index: Int): T
 
@@ -74,8 +72,6 @@ self =>
   }
 
   def canEqual(other: Any): Boolean = true
-  //---
-
 
   protected[this] type SuperParIterator = IterableSplitter[T]
 
@@ -121,6 +117,16 @@ self =>
     override def toString = "Elements(" + start + ", " + end + ")"
   }
 
+  /** Tests whether this $coll contains given index.
+    *
+    *  The implementations of methods `apply` and `isDefinedAt` turn a `ParSeq[T]` into
+    *  a `PartialFunction[Int, T]`.
+    *
+    * @param    idx     the index to test
+    * @return   `true` if this $coll contains an element at position `idx`, `false` otherwise.
+    */
+  def isDefinedAt(idx: Int): Boolean = (idx >= 0) && (idx < length)
+
   /* ParallelSeq methods */
 
   /** Returns the length of the longest segment of elements starting at
@@ -142,6 +148,46 @@ self =>
     tasksupport.executeAndWaitResult(new SegmentLength(p, 0, splitter.psplitWithSignalling(realfrom, length - realfrom)(1) assign ctx))._1
   }
 
+  /** Returns the length of the longest prefix whose elements all satisfy some predicate.
+    *
+    *  $mayNotTerminateInf
+    *
+    *  @param   p     the predicate used to test elements.
+    *  @return  the length of the longest prefix of this $coll
+    *           such that every element of the segment satisfies the predicate `p`.
+    */
+  def prefixLength(p: T => Boolean): Int = segmentLength(p, 0)
+
+  /** Finds index of first occurrence of some value in this $coll.
+    *
+    *  @param   elem   the element value to search for.
+    *  @tparam  B      the type of the element `elem`.
+    *  @return  the index of the first element of this $coll that is equal (as determined by `==`)
+    *           to `elem`, or `-1`, if none exists.
+    */
+  def indexOf[B >: T](elem: B): Int = indexOf(elem, 0)
+
+  /** Finds index of first occurrence of some value in this $coll after or at some start index.
+    *
+    *  @param   elem   the element value to search for.
+    *  @tparam  B      the type of the element `elem`.
+    *  @param   from   the start index
+    *  @return  the index `>= from` of the first element of this $coll that is equal (as determined by `==`)
+    *           to `elem`, or `-1`, if none exists.
+    */
+  def indexOf[B >: T](elem: B, from: Int): Int = indexWhere(elem == _, from)
+
+
+  /** Finds index of first element satisfying some predicate.
+    *
+    *  $mayNotTerminateInf
+    *
+    *  @param   p     the predicate used to test elements.
+    *  @return  the index of the first element of this $coll that satisfies the predicate `p`,
+    *           or `-1`, if none exists.
+    */
+  def indexWhere(p: T => Boolean): Int = indexWhere(p, 0)
+
   /** Finds the first element satisfying some predicate.
    *
    *  $indexsignalling
@@ -159,6 +205,38 @@ self =>
     ctx.setIndexFlag(Int.MaxValue)
     tasksupport.executeAndWaitResult(new IndexWhere(p, realfrom, splitter.psplitWithSignalling(realfrom, length - realfrom)(1) assign ctx))
   }
+
+
+  /** Finds index of last occurrence of some value in this $coll.
+    *
+    *  $willNotTerminateInf
+    *
+    *  @param   elem   the element value to search for.
+    *  @tparam  B      the type of the element `elem`.
+    *  @return  the index of the last element of this $coll that is equal (as determined by `==`)
+    *           to `elem`, or `-1`, if none exists.
+    */
+  def lastIndexOf[B >: T](elem: B): Int = lastIndexWhere(elem == _)
+
+  /** Finds index of last occurrence of some value in this $coll before or at a given end index.
+    *
+    *  @param   elem   the element value to search for.
+    *  @param   end    the end index.
+    *  @tparam  B      the type of the element `elem`.
+    *  @return  the index `<= end` of the last element of this $coll that is equal (as determined by `==`)
+    *           to `elem`, or `-1`, if none exists.
+    */
+  def lastIndexOf[B >: T](elem: B, end: Int): Int = lastIndexWhere(elem == _, end)
+
+  /** Finds index of last element satisfying some predicate.
+    *
+    *  $willNotTerminateInf
+    *
+    *  @param   p     the predicate used to test elements.
+    *  @return  the index of the last element of this $coll that satisfies the predicate `p`,
+    *           or `-1`, if none exists.
+    */
+  def lastIndexWhere(p: T => Boolean): Int = lastIndexWhere(p, length - 1)
 
   /** Finds the last element satisfying some predicate.
    *
@@ -248,6 +326,8 @@ self =>
     */
   def endsWith[S >: T](that: Iterable[S]): Boolean = seq.endsWith(that)
 
+  def patch[U >: T](from: Int, patch: Seq[U], replaced: Int): CC[U] = patch_sequential(from, patch, replaced)
+
   def patch[U >: T](from: Int, patch: ParSeq[U], replaced: Int): CC[U] = {
     val realreplaced = replaced min (length - from)
     if ((size - realreplaced + patch.size) > MIN_FOR_COPY) {
@@ -293,7 +373,25 @@ self =>
     patch(length, (immutable.ParVector.newBuilder[U] += elem).result() /*mutable.ParArray(elem)*/, 0)
   }
 
-  def padTo[U >: T, That](len: Int, elem: U): CC[U] = if (length < len) {
+
+  /** Produces a new sequence which contains all elements of this $coll and also all elements of
+    *  a given sequence. `xs union ys`  is equivalent to `xs ++ ys`.
+    *
+    * Another way to express this
+    * is that `xs union ys` computes the order-preserving multi-set union of `xs` and `ys`.
+    * `union` is hence a counter-part of `diff` and `intersect` which also work on multi-sets.
+    *
+    * $willNotTerminateInf
+    *
+    *  @param that   the sequence to add.
+    *  @tparam B     the element type of the returned $coll.
+    *  @return       a new $coll which contains all elements of this $coll
+    *                  followed by all elements of `that`.
+    */
+  def union[B >: T](that: scala.collection.Seq[B]): CC[B] = this ++ that
+  def union[B >: T](that: ParSeq[B]): CC[B] = this ++ that
+
+  def padTo[U >: T](len: Int, elem: U): CC[U] = if (length < len) {
     patch(length, new immutable.Repetition(elem, len - length), 0)
   } else patch(length, ParSeq.newBuilder[U].result(), 0)
 
@@ -325,6 +423,8 @@ self =>
     val ctx = new DefaultSignalling with VolatileAbort
     length == that.length && tasksupport.executeAndWaitResult(new Corresponds(p, splitter assign ctx, that.splitter))
   }
+
+  def diff[U >: T](that: ParSeq[U]): Repr = diff(that.seq)
 
   def diff[U >: T](that: scala.collection.Seq[U]): Repr = sequentially {
     _ diff that

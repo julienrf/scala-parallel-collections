@@ -35,8 +35,7 @@ trait ParMapLike[K,
                  +CC[X, Y] <: ParMap[X, Y],
                  +Repr <: ParMapLike[K, V, ParMap, Repr, Sequential] with ParMap[K, V],
                  +Sequential <: scala.collection.mutable.Map[K, V] with scala.collection.mutable.MapOps[K, V, scala.collection.mutable.Map, Sequential]]
-extends /*scala.collection.GenMapLike[K, V, Repr]
-   with*/scala.collection.parallel.ParIterableLike[(K, V), ParIterable, Repr, Sequential]
+extends scala.collection.parallel.ParIterableLike[(K, V), ParIterable, Repr, Sequential]
    with scala.collection.parallel.ParMapLike[K, V, CC, Repr, Sequential]
    with scala.collection.mutable.Growable[(K, V)]
    with scala.collection.mutable.Shrinkable[K]
@@ -46,9 +45,9 @@ extends /*scala.collection.GenMapLike[K, V, Repr]
 
   def put(key: K, value: V): Option[V]
 
-//  def +[U >: V](kv: (K, U)) = this.clone().asInstanceOf[ParMap[K, U]] += kv
-//
-//  def -(key: K) = this.clone() -= key
+  def +[U >: V](kv: (K, U)) = this.clone().asInstanceOf[CC[K, U]] += kv
+
+  def -(key: K) = this.clone() -= key
 
   def clear(): Unit
 

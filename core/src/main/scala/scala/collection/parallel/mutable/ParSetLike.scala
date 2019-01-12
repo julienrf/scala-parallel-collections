@@ -16,7 +16,6 @@ package parallel.mutable
 
 import scala.collection.mutable.Cloneable
 import scala.language.higherKinds
-//import scala.collection.GenSetLike
 import scala.collection.mutable.Growable
 import scala.collection.mutable.Shrinkable
 
@@ -36,8 +35,7 @@ trait ParSetLike[T,
                  +CC[X] <: ParIterable[X],
                  +Repr <: ParSetLike[T, CC, Repr, Sequential] with ParSet[T],
                  +Sequential <: mutable.Set[T] with mutable.SetOps[T, mutable.Set, Sequential]]
-extends /*GenSetLike[T, Repr]
-   with*/ scala.collection.parallel.ParIterableLike[T, CC, Repr, Sequential]
+extends scala.collection.parallel.ParIterableLike[T, CC, Repr, Sequential]
    with scala.collection.parallel.ParSetLike[T, CC, Repr, Sequential]
    with Growable[T]
    with Shrinkable[T]
@@ -50,9 +48,10 @@ self =>
 
   def subtractOne(elem: T): this.type
 
-//  def +(elem: T) = this.clone() += elem
-//
-//  def -(elem: T) = this.clone() -= elem
+  def +(elem: T) = this.clone() += elem
 
+  def -(elem: T) = this.clone() -= elem
+
+  override def clone(): Repr = empty ++= this
   // note: should not override toSet
 }

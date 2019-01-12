@@ -32,8 +32,7 @@ trait ParSetLike[T,
                  +CC[X] <: ParIterable[X],
                  +Repr <: ParSet[T],
                  +Sequential <: Set[T] with SetOps[T, Set, Sequential]]
-extends /*GenSetLike[T, Repr]
-   with*/ ParIterableLike[T, CC, Repr, Sequential]
+extends ParIterableLike[T, CC, Repr, Sequential]
   with (T => Boolean)
   with Equals
 { self =>
@@ -41,7 +40,54 @@ extends /*GenSetLike[T, Repr]
   // --- Members previously inherited from GenSetLike
   def contains(elem: T): Boolean
   final def apply(elem: T): Boolean = contains(elem)
+  def +(elem: T): Repr
+  def -(elem: T): Repr
 
+  /** Computes the intersection between this set and another set.
+    *
+    *  @param   that  the set to intersect with.
+    *  @return  a new set consisting of all elements that are both in this
+    *  set and in the given set `that`.
+    */
+  def intersect(that: ParSet[T]): Repr = this filter that
+  def intersect(that: Set[T]): Repr = this filter that
+
+  /** Computes the intersection between this set and another set.
+    *
+    *  '''Note:'''  Same as `intersect`.
+    *  @param   that  the set to intersect with.
+    *  @return  a new set consisting of all elements that are both in this
+    *  set and in the given set `that`.
+    */
+  def &(that: ParSet[T]): Repr = this intersect that
+  def &(that: Set[T]): Repr = this intersect that
+
+  /** Computes the union between this set and another set.
+    *
+    *  '''Note:'''  Same as `union`.
+    *  @param   that  the set to form the union with.
+    *  @return  a new set consisting of all elements that are in this
+    *  set or in the given set `that`.
+    */
+  def | (that: ParSet[T]): Repr = this union that
+  def | (that: Set[T]): Repr = this union that
+
+  /** The difference of this set and another set.
+    *
+    *  '''Note:'''  Same as `diff`.
+    *  @param that the set of elements to exclude.
+    *  @return     a set containing those elements of this
+    *              set that are not also contained in the given set `that`.
+    */
+  def &~(that: ParSet[T]): Repr = this diff that
+  def &~(that: Set[T]): Repr = this diff that
+
+  /** Tests whether this set is a subset of another set.
+    *
+    *  @param that  the set to test.
+    *  @return     `true` if this set is a subset of `that`, i.e. if
+    *              every element of this set is also an element of `that`.
+    */
   def subsetOf(that: ParSet[T]): Boolean = this.forall(that)
 
   /** Compares this set with another object for equality.

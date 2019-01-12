@@ -13,7 +13,7 @@
 package scala
 package collection
 
-//import scala.collection.parallel.mutable.ParArray
+import scala.collection.parallel.mutable.ParArray
 import scala.collection.mutable.UnrolledBuffer
 import scala.annotation.unchecked.uncheckedVariance
 import scala.language.implicitConversions
@@ -47,19 +47,19 @@ package object parallel {
     c
   }
 
-//  /** Adds toParArray method to collection classes. */
-//  implicit class CollectionsHaveToParArray[C, T](c: C)(implicit asGto: C => scala.collection.GenTraversableOnce[T]) {
-//    def toParArray = {
-//      val t = asGto(c)
-//      if (t.isInstanceOf[ParArray[_]]) t.asInstanceOf[ParArray[T]]
-//      else {
-//        val it = t.toIterator
-//        val cb = mutable.ParArrayCombiner[T]()
-//        while (it.hasNext) cb += it.next
-//        cb.result
-//      }
-//    }
-//  }
+  /** Adds toParArray method to collection classes. */
+  implicit class CollectionsHaveToParArray[C, T](c: C)(implicit asGto: C => scala.collection.IterableOnce[T]) {
+    def toParArray = {
+      val t = asGto(c)
+      if (t.isInstanceOf[ParArray[_]]) t.asInstanceOf[ParArray[T]]
+      else {
+        val it = t.iterator
+        val cb = mutable.ParArrayCombiner[T]()
+        while (it.hasNext) cb += it.next()
+        cb.result()
+      }
+    }
+  }
 }
 
 

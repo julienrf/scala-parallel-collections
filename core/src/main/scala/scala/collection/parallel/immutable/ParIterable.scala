@@ -30,8 +30,7 @@ import scala.collection.parallel.Combiner
  *  @since 2.9
  */
 trait ParIterable[+T]
-extends /*scala.collection.GenIterable[T]
-   with */scala.collection.parallel.ParIterable[T]
+extends scala.collection.parallel.ParIterable[T]
    with GenericParTemplate[T, ParIterable]
    with ParIterableLike[T, ParIterable, ParIterable[T], scala.collection.immutable.Iterable[T]]
 {

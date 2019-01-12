@@ -13,7 +13,6 @@
 package scala
 package collection.parallel
 
-//import scala.collection.GenIterable
 import scala.collection.generic._
 import scala.collection.parallel.mutable.ParArrayCombiner
 
@@ -29,8 +28,7 @@ import scala.collection.parallel.mutable.ParArrayCombiner
  *  @since 2.9
  */
 trait ParIterable[+T]
-  extends /*GenIterable[T]
-    with*/ GenericParTemplate[T, ParIterable]
+  extends GenericParTemplate[T, ParIterable]
     with ParIterableLike[T, ParIterable, ParIterable[T], Iterable[T]] {
   def companion: GenericParCompanion[ParIterable] = ParIterable
 

@@ -15,7 +15,6 @@ package collection.parallel
 
 import scala.collection.generic.GenericParMapCompanion
 import scala.collection.{IterableOnce, MapOps}
-//import scala.collection.GenMapLike
 import scala.collection.Map
 
 import scala.annotation.unchecked.uncheckedVariance
@@ -39,8 +38,7 @@ trait ParMapLike[K,
                  +CC[X, Y] <: ParMap[X, Y],
                  +Repr <: ParMapLike[K, V, ParMap, Repr, Sequential] with ParMap[K, V],
                  +Sequential <: Map[K, V] with MapOps[K, V, Map, Sequential]]
-extends /*GenMapLike[K, V, Repr]
-   with*/ ParIterableLike[(K, V), ParIterable, Repr, Sequential]
+extends ParIterableLike[(K, V), ParIterable, Repr, Sequential]
   with Equals
 {
 self =>
@@ -81,6 +79,10 @@ self =>
   // This hash code must be symmetric in the contents but ought not
   // collide trivially.
   override def hashCode(): Int = scala.util.hashing.MurmurHash3.unorderedHash(this, "ParMap".hashCode)
+
+  def +[V1 >: V](kv: (K, V1)): CC[K, V1]
+  def updated [V1 >: V](key: K, value: V1): CC[K, V1] = this + ((key, value))
+  def - (key: K): Repr
   // ---
 
   def mapCompanion: GenericParMapCompanion[CC]
@@ -140,10 +142,10 @@ self =>
   protected class DefaultKeySet extends ParSet[K] {
     def contains(key : K) = self.contains(key)
     def splitter = keysIterator(self.splitter)
-//    def + (elem: K): ParSet[K] =
-//      (ParSet[K]() ++ this + elem).asInstanceOf[ParSet[K]] // !!! concrete overrides abstract problem
-//    def - (elem: K): ParSet[K] =
-//      (ParSet[K]() ++ this - elem).asInstanceOf[ParSet[K]] // !!! concrete overrides abstract problem
+    def + (elem: K): ParSet[K] =
+      ParSet[K]() ++ this + elem // !!! concrete overrides abstract problem
+    def - (elem: K): ParSet[K] =
+      ParSet[K]() ++ this - elem // !!! concrete overrides abstract problem
     def size = self.size
     def knownSize = self.knownSize
     override def foreach[U](f: K => U) = for ((k, v) <- self) f(k)
@@ -173,8 +175,8 @@ self =>
     def seq = self.seq.view.filterKeys(p).to(Map)
     def size = filtered.size
     def knownSize = filtered.knownSize
-//    def + [U >: V](kv: (K, U)): ParMap[K, U] = ParMap[K, U]() ++ this + kv
-//    def - (key: K): ParMap[K, V] = ParMap[K, V]() ++ this - key
+    def + [U >: V](kv: (K, U)): ParMap[K, U] = ParMap[K, U]() ++ this + kv
+    def - (key: K): ParMap[K, V] = ParMap[K, V]() ++ this - key
   }
 
   def mapValues[S](f: V => S): ParMap[K, S] = new ParMap[K, S] {
@@ -185,8 +187,8 @@ self =>
     override def contains(key: K) = self.contains(key)
     def get(key: K) = self.get(key).map(f)
     def seq = self.seq.view.mapValues(f).to(Map)
-//    def + [U >: S](kv: (K, U)): ParMap[K, U] = ParMap[K, U]() ++ this + kv
-//    def - (key: K): ParMap[K, S] = ParMap[K, S]() ++ this - key
+    def + [U >: S](kv: (K, U)): ParMap[K, U] = ParMap[K, U]() ++ this + kv
+    def - (key: K): ParMap[K, S] = ParMap[K, S]() ++ this - key
   }
 
   /** Builds a new map by applying a function to all elements of this $coll.

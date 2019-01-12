@@ -26,8 +26,7 @@ import scala.collection.generic._
  *  @since 2.9
  */
 trait ParSet[T]
-   extends /*GenSet[T]
-   with*/ GenericParTemplate[T, ParSet]
+   extends GenericParTemplate[T, ParSet]
    with ParIterable[T]
    with ParSetLike[T, ParSet, ParSet[T], Set[T]]
 { self =>

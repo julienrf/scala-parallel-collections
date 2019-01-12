@@ -28,8 +28,7 @@ import scala.collection.parallel.Combiner
  *  @since 2.9
  */
 trait ParMap[K, V]
-extends /*GenMap[K, V]
-   with*/ parallel.ParMap[K, V]
+extends parallel.ParMap[K, V]
    with ParIterable[(K, V)]
    with GenericParMapTemplate[K, V, ParMap]
    with ParMapLike[K, V, ParMap, ParMap[K, V], mutable.Map[K, V]]
@@ -42,8 +41,6 @@ extends /*GenMap[K, V]
   override def empty: ParMap[K, V] = new ParHashMap[K, V]
 
   def seq: scala.collection.mutable.Map[K, V]
-
-//  override def updated [U >: V](key: K, value: U): ParMap[K, U] = this + ((key, value))
 
   /** The same map with a given default function.
    *  Note: `get`, `contains`, `iterator`, `keys`, etc are not affected by `withDefault`.

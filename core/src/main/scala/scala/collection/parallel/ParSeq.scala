@@ -17,7 +17,6 @@ import scala.collection.generic.GenericParCompanion
 import scala.collection.generic.GenericParTemplate
 import scala.collection.generic.ParFactory
 //import scala.collection.generic.CanCombineFrom
-//import scala.collection.GenSeq
 import scala.collection.parallel.mutable.ParArrayCombiner
 
 /** A template trait for parallel sequences.
@@ -30,8 +29,7 @@ import scala.collection.parallel.mutable.ParArrayCombiner
  *
  *  @author Aleksandar Prokopec
  */
-trait ParSeq[+T] extends /*GenSeq[T]
-                    with*/ ParIterable[T]
+trait ParSeq[+T] extends ParIterable[T]
                     with GenericParTemplate[T, ParSeq]
                     with ParSeqLike[T, ParSeq, ParSeq[T], scala.collection.Seq[T]]
 {
