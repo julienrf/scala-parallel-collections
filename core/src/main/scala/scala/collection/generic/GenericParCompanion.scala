@@ -80,9 +80,6 @@ object GenericParCompanion {
 }
 
 trait GenericParMapCompanion[+CC[P, Q] <: ParMap[P, Q]] {
-//  /** The default builder for $Coll objects.
-//    */
-//  def newBuilder[P, Q]: Combiner[(P, Q), CC[P, Q]]
 
   def newCombiner[P, Q]: Combiner[(P, Q), CC[P, Q]]
 

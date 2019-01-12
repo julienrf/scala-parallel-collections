@@ -75,9 +75,9 @@ object ParMap extends ParMapFactory[ParMap] {
     def addOne(kv: (K, V)) = {underlying += kv; this}
     def subtractOne(key: K) = {underlying -= key; this}
     override def empty = new WithDefault(underlying.empty, d)
-//    override def updated[U >: V](key: K, value: U): WithDefault[K, U] = new WithDefault[K, U](underlying.updated[U](key, value), d)
-//    override def + [U >: V](kv: (K, U)): WithDefault[K, U] = updated(kv._1, kv._2)
-//    override def - (key: K): WithDefault[K, V] = new WithDefault(underlying - key, d)
+    override def updated[U >: V](key: K, value: U): WithDefault[K, U] = new WithDefault[K, U](underlying.updated[U](key, value), d)
+    override def + [U >: V](kv: (K, U)): WithDefault[K, U] = updated(kv._1, kv._2)
+    override def - (key: K): WithDefault[K, V] = new WithDefault(underlying - key, d)
     override def seq = underlying.seq.withDefault(d)
     def clear() = underlying.clear()
     def put(key: K, value: V): Option[V] = underlying.put(key, value)

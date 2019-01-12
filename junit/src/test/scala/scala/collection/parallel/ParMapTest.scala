@@ -39,17 +39,17 @@ class ParMapTest {
     assertTrue(dm(0) == 0)
     assertTrue(dm(1) == 1)
     assertTrue(dm(2) == -2)
-//    assertTrue(dm.updated(2, 2) == parallel.ParMap(0 -> 0, 1 -> 1, 2 -> 2))
+    assertTrue(dm.updated(2, 2) == parallel.ParMap(0 -> 0, 1 -> 1, 2 -> 2))
     dm.put(3, 3)
     assertTrue(dm(3) == 3)
     assertTrue(pm(3) == 3)
     assertTrue(dm(4) == -4)
 
-//    val imdm = parallel.immutable.ParMap(0 -> 0, 1 -> 1).withDefault(x => -x)
-//    assertTrue(imdm(0) == 0)
-//    assertTrue(imdm(1) == 1)
-//    assertTrue(imdm(2) == -2)
-//    assertTrue(imdm.updated(2, 2) == parallel.ParMap(0 -> 0, 1 -> 1, 2 -> 2))
+    val imdm = parallel.immutable.ParMap(0 -> 0, 1 -> 1).withDefault(x => -x)
+    assertTrue(imdm(0) == 0)
+    assertTrue(imdm(1) == 1)
+    assertTrue(imdm(2) == -2)
+    assertTrue(imdm.updated(2, 2) == parallel.ParMap(0 -> 0, 1 -> 1, 2 -> 2))
   }
 
 }

@@ -326,7 +326,7 @@ self =>
     */
   def endsWith[S >: T](that: Iterable[S]): Boolean = seq.endsWith(that)
 
-  def patch[U >: T](from: Int, patch: Seq[U], replaced: Int): CC[U] = patch_sequential(from, patch, replaced)
+  def patch[U >: T](from: Int, patch: scala.collection.Seq[U], replaced: Int): CC[U] = patch_sequential(from, patch, replaced)
 
   def patch[U >: T](from: Int, patch: ParSeq[U], replaced: Int): CC[U] = {
     val realreplaced = replaced min (length - from)

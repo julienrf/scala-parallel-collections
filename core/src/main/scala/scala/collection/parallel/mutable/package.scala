@@ -14,7 +14,6 @@ package scala
 package collection.parallel
 
 import scala.collection.mutable.ArrayBuffer
-//import scala.collection.mutable.ArraySeq
 import scala.collection.generic.Sizing
 
 package object mutable {

@@ -111,8 +111,8 @@ with IntValues
   def vvalues = intvalues.values
 
   override def printDataStructureDebugInfo(ds: AnyRef) = ds match {
-//    case pm: ParHashMap[k, v] =>
-//      pm.printDebugInfo
+    case pm: ParHashMap[k, v] =>
+      pm.printDebugInfo
     case _ =>
       println("could not match data structure type: " + ds.getClass)
   }

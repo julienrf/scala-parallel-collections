@@ -3,7 +3,6 @@ package scala.collection.generic
 import scala.language.higherKinds
 import scala.annotation.migration
 import scala.annotation.unchecked.uncheckedVariance
-//import scala.collection.GenTraversableOnce
 import scala.collection.mutable.Builder
 import scala.collection.parallel.ParIterable
 
@@ -17,7 +16,7 @@ import scala.collection.parallel.ParIterable
  *  @define coll  collection
  */
 // TODO inline in GenericParTemplate or ParIterable
-trait GenericTraversableTemplate[+A, +CC[X] /*<: GenTraversable[X]*/] extends HasNewBuilder[A, CC[A] @uncheckedVariance] {
+trait GenericTraversableTemplate[+A, +CC[X] <: ParIterable[X]] extends HasNewBuilder[A, CC[A] @uncheckedVariance] {
 
   /** A sequential collection containing the same elements as this collection */
   def seq: Iterable[A]
@@ -51,18 +50,18 @@ trait GenericTraversableTemplate[+A, +CC[X] /*<: GenTraversable[X]*/] extends Ha
   /** The factory companion object that builds instances of class $Coll.
    *  (or its `Iterable` superclass where class $Coll is not a `Seq`.)
    */
-//  def companion: GenericCompanion[CC]
+  def companion: GenericParCompanion[CC]
 
   /** The builder that builds instances of type $Coll[A]
    */
-  protected[this] def newBuilder: Builder[A, CC[A]]/* = companion.newBuilder[A]*/
+  protected[this] def newBuilder: Builder[A, CC[A]] = companion.newBuilder[A]
 
   /** The generic builder that builds instances of $Coll
    *  at arbitrary element types.
    */
-  def genericBuilder[B]: Builder[B, CC[B]]/* = companion.newBuilder[B]*/
+  def genericBuilder[B]: Builder[B, CC[B]] = companion.newBuilder[B]
 
-  private def sequential: IterableOnce[A] = this.asInstanceOf[ParIterable[A]].seq /*this.asInstanceOf[GenTraversableOnce[A]].seq*/
+  private def sequential: IterableOnce[A] = this.seq
 
   /** Converts this $coll of pairs into two collections of the first and second
    *  half of each pair.

@@ -20,8 +20,6 @@ import scala.collection.{CustomParallelizable, IterableOps, Parallel}
 import scala.collection.generic._
 import immutable.HashMapCombiner
 import scala.reflect.ClassTag
-//import scala.annotation.unchecked.uncheckedVariance
-//import scala.collection.parallel.ParallelCollectionImplicits._
 
 
 /** A template trait for parallel collections of type `ParIterable[T]`.
@@ -149,7 +147,7 @@ import scala.reflect.ClassTag
  *  @define Coll `ParIterable`
  *  @define coll parallel iterable
  */
-trait ParIterableLike[+T, +CC[X] <: ParIterable[X], +Repr <: ParIterable[T], +Sequential <: Iterable[T] with IterableOps[T, Iterable /* TODO */, Sequential]]
+trait ParIterableLike[+T, +CC[X] <: ParIterable[X], +Repr <: ParIterable[T], +Sequential <: Iterable[T] with IterableOps[T, Iterable, Sequential]]
 extends IterableOnce[T]
    with CustomParallelizable[T, Repr]
    with Parallel
@@ -657,7 +655,7 @@ self =>
     cb.resultWithTaskSupport
   }
 
-  /*override*/ def slice(unc_from: Int, unc_until: Int): Repr = {
+  def slice(unc_from: Int, unc_until: Int): Repr = {
     val from = unc_from min size max 0
     val until = unc_until min size max from
     if ((until - from) <= MIN_FOR_COPY) slice_sequential(from, until)
@@ -825,39 +823,37 @@ self =>
     tasksupport.executeAndWaitResult(new ToParMap(combinerFactory(cbf), splitter)(ev) mapResult { _.resultWithTaskSupport })
   }
 
-  /*override*/ def toArray[U >: T: ClassTag]: Array[U] = {
+  def toArray[U >: T: ClassTag]: Array[U] = {
     val arr = new Array[U](size)
     copyToArray(arr)
     arr
   }
 
-  /*override*/ def toList: List[T] = seq.toList
+  def toList: List[T] = seq.toList
 
-  /*override*/ def toIndexedSeq: scala.collection.immutable.IndexedSeq[T] = seq.toIndexedSeq
+  def toIndexedSeq: scala.collection.immutable.IndexedSeq[T] = seq.toIndexedSeq
 
   @deprecated("Use `to(LazyList)` instead.", "0.1.3")
-  /*override*/ def toStream: Stream[T] = seq.toStream
+  def toStream: Stream[T] = seq.toStream
 
-  /*override*/ def toIterator: Iterator[T] = splitter
+  def toIterator: Iterator[T] = splitter
 
-  // the methods below are overridden
-
-  /*override*/ def toBuffer[U >: T]: scala.collection.mutable.Buffer[U] = seq.toBuffer // have additional, parallel buffers?
+  def toBuffer[U >: T]: scala.collection.mutable.Buffer[U] = seq.toBuffer // have additional, parallel buffers?
 
   @deprecated("Use `toIterable` instead", "0.1.3")
-  /*override*/ def toTraversable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
+  def toTraversable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
 
-  /*override*/ def toIterable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
+  def toIterable: ParIterable[T] = this.asInstanceOf[ParIterable[T]]
 
   def toSeq: ParSeq[T] = toParCollection[T, ParSeq[T]](() => ParSeq.newCombiner[T])
 
   def toSet[U >: T]: immutable.ParSet[U] = toParCollection[U, immutable.ParSet[U]](() => immutable.ParSet.newCombiner[U])
-/*
-  override def toMap[K, V](implicit ev: T <:< (K, V)): immutable.ParMap[K, V] = toParMap[K, V, immutable.ParMap[K, V]](() => immutable.ParMap.newCombiner[K, V])
-*/
-  /*override*/ def toVector: Vector[T] = to(Vector)
 
-  /*override*/ def to[C](factory: collection.Factory[T, C]): C = factory.fromSpecific(this)
+  def toMap[K, V](implicit ev: T <:< (K, V)): immutable.ParMap[K, V] = toParMap[K, V, immutable.ParMap[K, V]](() => immutable.ParMap.newCombiner[K, V])
+
+  def toVector: Vector[T] = to(Vector)
+
+  def to[C](factory: collection.Factory[T, C]): C = factory.fromSpecific(this)
 
   /* tasks */
 

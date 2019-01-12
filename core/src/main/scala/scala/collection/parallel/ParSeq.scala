@@ -41,7 +41,6 @@ trait ParSeq[+T] extends ParIterable[T]
   override def toString = super[ParIterable].toString
 
   override def stringPrefix = getClass.getSimpleName
-
 }
 
 object ParSeq extends ParFactory[ParSeq] {

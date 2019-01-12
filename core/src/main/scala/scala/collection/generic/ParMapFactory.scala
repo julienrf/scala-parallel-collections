@@ -17,7 +17,6 @@ package generic
 import scala.collection.parallel.ParMap
 import scala.collection.parallel.ParMapLike
 import scala.collection.parallel.Combiner
-//import scala.collection.mutable.Builder
 import scala.language.higherKinds
 
 /** A template class for companion objects of `ParMap` and subclasses thereof.
@@ -46,11 +45,11 @@ extends GenericParMapCompanion[CC] {
 
   type MapColl = CC[_, _]
 
-//  /** The default builder for $Coll objects.
-//   *  @tparam K      the type of the keys
-//   *  @tparam V      the type of the associated values
-//   */
-//  def newBuilder[K, V]: mutable.Builder[(K, V), CC[K, V]] = newCombiner[K, V]
+  /** The default builder for $Coll objects.
+   *  @tparam K      the type of the keys
+   *  @tparam V      the type of the associated values
+   */
+  def newBuilder[K, V]: mutable.Builder[(K, V), CC[K, V]] = newCombiner[K, V]
 
   /** The default combiner for $Coll objects.
    *  @tparam K     the type of the keys

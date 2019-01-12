@@ -80,7 +80,7 @@ trait ParMapLike[
 
   def empty: Repr
 
-  def toMap[P, Q](implicit ev: (K, V) <:< (P, Q)): ParMap[P, Q] = this.asInstanceOf[ParMap[P, Q]]
+  override def toMap[P, Q](implicit ev: (K, V) <:< (P, Q)): ParMap[P, Q] = this.asInstanceOf[ParMap[P, Q]]
 
   override def updated [U >: V](key: K, value: U): CC[K, U] = this + ((key, value))
 

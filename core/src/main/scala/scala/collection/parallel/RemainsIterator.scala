@@ -17,7 +17,6 @@ import scala.collection.generic.Signalling
 import scala.collection.generic.DelegatedSignalling
 import scala.collection.generic.IdleSignalling
 import scala.collection.mutable.Builder
-//import scala.collection.GenTraversableOnce
 import scala.collection.parallel.immutable.repetition
 
 private[collection] trait RemainsIterator[+T] extends Iterator[T] {
@@ -289,7 +288,7 @@ private[collection] trait AugmentedSeqIterator[+T] extends AugmentedIterableIter
     total
   }
 
-  /*override*/ def indexWhere(pred: T => Boolean): Int = {
+  def indexWhere(pred: T => Boolean): Int = {
     var i = 0
     var loop = true
     while (hasNext && loop) {

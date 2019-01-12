@@ -14,10 +14,10 @@ class ParSeqConversionsTest {
     // par.to* and to*.par tests
     assertToPar(scala.collection.parallel.mutable.ParArray(1 -> 1, 2 -> 2, 3 -> 3))
     assertToPar(scala.collection.parallel.immutable.ParVector(1 -> 1, 2 -> 2, 3 -> 3))
-//    assertToPar(scala.collection.parallel.mutable.ParHashMap(1 -> 2))
-//    assertToPar(scala.collection.parallel.mutable.ParHashSet(1 -> 2))
-//    assertToPar(scala.collection.parallel.immutable.ParHashMap(1 -> 2))
-//    assertToPar(scala.collection.parallel.immutable.ParHashSet(1 -> 3))
+    assertToPar(scala.collection.parallel.mutable.ParHashMap(1 -> 2))
+    assertToPar(scala.collection.parallel.mutable.ParHashSet(1 -> 2))
+    assertToPar(scala.collection.parallel.immutable.ParHashMap(1 -> 2))
+    assertToPar(scala.collection.parallel.immutable.ParHashSet(1 -> 3))
 
     assertToParWoMap(scala.collection.parallel.immutable.ParRange(1, 10, 2, false))
     assertToParWoMap(scala.collection.parallel.immutable.ParVector(1, 2, 3))

@@ -81,11 +81,11 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
     }).reduceLeft(_ && _)
   }
 
-//  property("prefixLengths must be equal") = forAllNoShrink(collectionPairs) { case (s, coll) =>
-//    (for ((pred, ind) <- segmentLengthPredicates.zipWithIndex) yield {
-//      ("operator " + ind) |: s.prefixLength(pred) == coll.prefixLength(pred)
-//    }).reduceLeft(_ && _)
-//  }
+  property("prefixLengths must be equal") = forAllNoShrink(collectionPairs) { case (s, coll) =>
+    (for ((pred, ind) <- segmentLengthPredicates.zipWithIndex) yield {
+      ("operator " + ind) |: s.segmentLength(pred) == coll.prefixLength(pred)
+    }).reduceLeft(_ && _)
+  }
 
   property("indexWheres must be equal") = forAllNoShrink(collectionPairsWithLengths) { case (s, coll, len) =>
     (for ((pred, ind) <- indexWherePredicates.zipWithIndex) yield {
@@ -207,10 +207,10 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
     }).foldLeft(Prop.passed)(_ && _)
   }
 
-//  property("unions must be equal") = forAllNoShrink(collectionPairsWithModified) { case (s, coll, collmodif) =>
-//    ("modified" |: s.union(collmodif.seq) == coll.union(collmodif)) &&
-//    ("empty" |: s.union(Nil) == coll.union(fromSeq(Nil)))
-//  }
+  property("unions must be equal") = forAllNoShrink(collectionPairsWithModified) { case (s, coll, collmodif) =>
+    ("modified" |: s.++(collmodif.seq).sameElements(coll.union(collmodif))) &&
+    ("empty" |: s.++(Nil).sameElements(coll.union(fromSeq(Nil))))
+  }
 
   // This is failing with my views patch: array index out of bounds in the array iterator.
   // Couldn't see why this and only this was impacted, could use a second pair of eyes.
@@ -218,13 +218,13 @@ abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableChe
   // This was failing because some corner cases weren't added to the patch method in ParSeqLike.
   // Curiously, this wasn't detected before.
   //
-//  if (!isCheckingViews) property("patches must be equal") = forAll(collectionTripletsWith2Indices) {
-//    case (s, coll, pat, from, repl) =>
-//    ("with seq" |: s.patch(from, pat, repl) == coll.patch(from, pat, repl)) &&
-//    ("with par" |: s.patch(from, pat, repl) == coll.patch(from, fromSeq(pat), repl)) &&
-//    ("with empty" |: s.patch(from, Nil, repl) == coll.patch(from, fromSeq(Nil), repl)) &&
-//    ("with one" |: (s.length == 0 || s.patch(from, List(s(0)), 1) == coll.patch(from, fromSeq(List(coll(0))), 1)))
-//  }
+  if (!isCheckingViews) property("patches must be equal") = forAll(collectionTripletsWith2Indices) {
+    case (s, coll, pat, from, repl) =>
+    ("with seq" |: s.patch(from, pat, repl).sameElements(coll.patch(from, pat, repl))) &&
+    ("with par" |: s.patch(from, pat, repl).sameElements(coll.patch(from, fromSeq(pat), repl))) &&
+    ("with empty" |: s.patch(from, Nil, repl).sameElements(coll.patch(from, fromSeq(Nil), repl))) &&
+    ("with one" |: (s.length == 0 || s.patch(from, List(s(0)), 1).sameElements(coll.patch(from, fromSeq(List(coll(0))), 1))))
+  }
 
   if (!isCheckingViews) property("updates must be equal") = forAllNoShrink(collectionPairsWithLengths) { case (s, coll, len) =>
     val pos = if (len >= s.length) s.length - 1 else len
