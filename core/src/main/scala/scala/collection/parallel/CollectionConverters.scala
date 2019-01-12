@@ -15,7 +15,7 @@ package scala.collection.parallel
 import scala.collection.immutable.{OldHashMap, OldHashSet}
 import scala.language.implicitConversions
 import scala.{collection => sc}
-import scala.collection.{immutable => sci, mutable => scm}
+import scala.collection.{immutable => sci, mutable => scm, concurrent => scc}
 
 /** Extension methods for `.par` on sequential collections. */
 object CollectionConverters {
@@ -161,7 +161,7 @@ object CollectionConverters {
     def seq = coll
     override def par = coll match {
       case coll: scm.HashMap[K, V] => new MutableHashMapIsParallelizable(coll).par
-//      case coll: scc.TrieMap[_, _] => new ConcurrentTrieMapIsParallelizable(coll.asInstanceOf[scc.TrieMap[K, V]]).par
+      case coll: scc.TrieMap[K, V] => new ConcurrentTrieMapIsParallelizable(coll).par
       case _ => mutable.ParMap.newCombiner[K, V].fromSequential(seq)
     }
   }
@@ -176,10 +176,10 @@ object CollectionConverters {
     override def par = coll.to(mutable.ParHashMap) // TODO Redesign mutable.ParHashMap so that conversion from sequential scm.HashMap takes constant time
   }
 
-//  implicit class ConcurrentTrieMapIsParallelizable[K, V](private val coll: scc.TrieMap[K, V]) extends AnyVal with CustomParallelizable[(K, V), mutable.ParTrieMap[K, V]] {
-//    def seq = coll
-//    override def par = new mutable.ParTrieMap(coll)
-//  }
+  implicit class ConcurrentTrieMapIsParallelizable[K, V](private val coll: scc.TrieMap[K, V]) extends AnyVal with sc.CustomParallelizable[(K, V), mutable.ParTrieMap[K, V]] {
+    def seq = coll
+    override def par = new mutable.ParTrieMap(coll)
+  }
 
   // Other
 

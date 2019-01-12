@@ -29,7 +29,7 @@ package scala {
       include(new mutable.IntIntParallelHashMapCheck(support) {})
     
       // parallel ctrie
-//      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})
+      include(new mutable.IntIntParallelConcurrentTrieMapCheck(support) {})
     
       // parallel mutable hash sets (tables)
       include(new mutable.IntParallelHashSetCheck(support) {})
