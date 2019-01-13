@@ -17,7 +17,7 @@ package collection.parallel.mutable
 
 import scala.collection.generic.GenericParTemplate
 import scala.collection.generic.GenericParCompanion
-//import scala.collection.generic.CanCombineFrom
+import scala.collection.generic.CanCombineFrom
 import scala.collection.generic.ParFactory
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.SeqSplitter
@@ -82,6 +82,7 @@ self =>
   }
 
   def length = sz
+  def knownSize = sz
 
   def seq = (if (length == arrayseq.length) arrayseq else arrayseq.take(length)): ArraySeq[T]
 
@@ -692,7 +693,7 @@ self =>
  *  @define coll parallel array
  */
 object ParArray extends ParFactory[ParArray] {
-//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParArray[T]] = new GenericCanCombineFrom[T]
+  implicit def canBuildFrom[T]: CanCombineFrom[ParArray[_], T, ParArray[T]] = new GenericCanCombineFrom[T]
   def newBuilder[T]: Combiner[T, ParArray[T]] = newCombiner
   def newCombiner[T]: Combiner[T, ParArray[T]] = ParArrayCombiner[T]
 

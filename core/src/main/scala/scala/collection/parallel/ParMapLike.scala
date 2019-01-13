@@ -268,7 +268,7 @@ self =>
   }
 
   /** Alias for `concat` */
-  /*@`inline` final*/ def ++ [V2 >: V](xs: collection.IterableOnce[(K, V2)]): CC[K, V2] = concat(xs)
+  @`inline` final def ++ [V2 >: V](xs: collection.IterableOnce[(K, V2)]): CC[K, V2] = concat(xs)
 
   // note - should not override toMap (could be mutable)
 }

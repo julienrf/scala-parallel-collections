@@ -114,7 +114,7 @@ extends ParSet[T]
  *  @define coll parallel hash set
  */
 object ParHashSet extends ParSetFactory[ParHashSet] {
-//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParHashSet[T]] = new GenericCanCombineFrom[T]
+  implicit def canBuildFrom[T]: CanCombineFrom[ParHashSet[_], T, ParHashSet[T]] = new GenericCanCombineFrom[T]
 
   override def newBuilder[T]: Combiner[T, ParHashSet[T]] = newCombiner
 

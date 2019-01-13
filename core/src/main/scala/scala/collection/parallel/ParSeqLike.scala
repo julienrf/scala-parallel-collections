@@ -85,7 +85,6 @@ self =>
   override def iterator: PreciseSplitter[T] = splitter
 
   final def size = length
-  final def knownSize = length
 
   /** Used to iterate elements using indices */
   protected abstract class Elements(start: Int, val end: Int) extends SeqSplitter[T] with BufferedIterator[T] {
@@ -366,11 +365,11 @@ self =>
   }
 
   def +:[U >: T, That](elem: U): CC[U] = {
-    patch(0, (immutable.ParVector.newBuilder[U] += elem).result() /*mutable.ParArray(elem)*/, 0)
+    patch(0, mutable.ParArray(elem), 0)
   }
 
   def :+[U >: T, That](elem: U): CC[U] = {
-    patch(length, (immutable.ParVector.newBuilder[U] += elem).result() /*mutable.ParArray(elem)*/, 0)
+    patch(length, mutable.ParArray(elem), 0)
   }
 
 

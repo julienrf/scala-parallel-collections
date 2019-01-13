@@ -43,6 +43,8 @@ extends GenericParMapCompanion[CC] {
     */
   def apply[K, V](elems: (K, V)*): CC[K, V] = (newCombiner[K, V] ++= elems).result()
 
+  def empty[K, V]: CC[K, V]
+
   type MapColl = CC[_, _]
 
   /** The default builder for $Coll objects.

@@ -14,9 +14,7 @@ package scala
 package collection
 package parallel.immutable
 
-import scala.collection.generic.GenericParTemplate
-import scala.collection.generic.GenericParCompanion
-import scala.collection.generic.ParFactory
+import scala.collection.generic.{CanCombineFrom, GenericParCompanion, GenericParTemplate, ParFactory}
 import scala.collection.parallel.ParSeqLike
 import scala.collection.parallel.Combiner
 
@@ -40,7 +38,7 @@ extends scala.collection.parallel.ParSeq[T]
  *  @define coll mutable parallel sequence
  */
 object ParSeq extends ParFactory[ParSeq] {
-//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParSeq[T]] = new GenericCanCombineFrom[T]
+  implicit def canBuildFrom[T]: CanCombineFrom[ParSeq[_], T, ParSeq[T]] = new GenericCanCombineFrom[T]
 
   def newBuilder[T]: Combiner[T, ParSeq[T]] = ParVector.newBuilder[T]
   def newCombiner[T]: Combiner[T, ParSeq[T]] = ParVector.newCombiner[T]

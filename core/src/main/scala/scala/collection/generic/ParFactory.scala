@@ -219,13 +219,13 @@ extends GenericParCompanion[CC] {
   }
 
   //type EPC[T, C] = scala.collection.parallel.EnvironmentPassingCombiner[T, C]
-/*
+
   /** A generic implementation of the `CanCombineFrom` trait, which forwards
    *  all calls to `apply(from)` to the `genericParBuilder` method of the $coll
    * `from`, and calls to `apply()` to this factory.
    */
-  class GenericCanCombineFrom[A] extends GenericCanBuildFrom[A] with CanCombineFrom[CC[_], A, CC[A]] {
-    override def apply(from: Coll) = from.genericCombiner
+  class GenericCanCombineFrom[A] extends CanCombineFrom[CC[_], A, CC[A]] {
+    override def apply(from: CC[_]) = from.genericCombiner
     override def apply() = newBuilder[A]
-  }*/
+  }
 }

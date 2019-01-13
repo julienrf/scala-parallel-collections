@@ -21,9 +21,7 @@ import scala.collection.parallel.Combiner
 import scala.collection.parallel.IterableSplitter
 import scala.collection.mutable.UnrolledBuffer.Unrolled
 import scala.collection.mutable.UnrolledBuffer
-import scala.collection.generic.ParSetFactory
-import scala.collection.generic.GenericParTemplate
-import scala.collection.generic.GenericParCompanion
+import scala.collection.generic.{CanCombineFrom, GenericParCompanion, GenericParTemplate, ParSetFactory}
 import scala.collection.immutable.{OldHashSet, TrieIterator}
 import scala.collection.parallel.Task
 
@@ -129,8 +127,8 @@ self =>
 object ParHashSet extends ParSetFactory[ParHashSet] {
   def newCombiner[T]: Combiner[T, ParHashSet[T]] = HashSetCombiner[T]
 
-//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParHashSet[T]] =
-//    new GenericCanCombineFrom[T]
+  implicit def canBuildFrom[T]: CanCombineFrom[ParHashSet[_], T, ParHashSet[T]] =
+    new GenericCanCombineFrom[T]
 
   def fromTrie[T](t: OldHashSet[T]) = new ParHashSet(t)
 }

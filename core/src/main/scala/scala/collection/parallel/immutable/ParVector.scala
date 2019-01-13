@@ -14,7 +14,7 @@ package scala
 package collection
 package parallel.immutable
 
-import scala.collection.generic.{GenericParTemplate, /*CanCombineFrom,*/ ParFactory}
+import scala.collection.generic.{GenericParTemplate, CanCombineFrom, ParFactory}
 import scala.collection.parallel.ParSeqLike
 import scala.collection.parallel.Combiner
 import scala.collection.parallel.SeqSplitter
@@ -52,6 +52,7 @@ extends ParSeq[T]
   def apply(idx: Int) = vector.apply(idx)
 
   def length = vector.length
+  def knownSize = vector.knownSize
 
   def splitter: SeqSplitter[T] = {
     val pit = new ParVectorIterator(vector.startIndex, vector.endIndex)
@@ -93,8 +94,8 @@ extends ParSeq[T]
  *  @define coll immutable parallel vector
  */
 object ParVector extends ParFactory[ParVector] {
-  /*implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParVector[T]] =
-    new GenericCanCombineFrom[T]*/
+  implicit def canBuildFrom[T]: CanCombineFrom[ParVector[_], T, ParVector[T]] =
+    new GenericCanCombineFrom[T]
 
   def newBuilder[T]: Combiner[T, ParVector[T]] = newCombiner[T]
 

@@ -90,7 +90,7 @@ trait GenericParMapCompanion[+CC[P, Q] <: ParMap[P, Q]] {
 object GenericParMapCompanion {
   /**
     * Implicit conversion for converting any `ParFactory` into a sequential `Factory`.
-    * This provides supports for the `to` conversion method (eg, `xs.to(ParArray)`).
+    * This provides supports for the `to` conversion method (eg, `xs.to(ParMap)`).
     */
   implicit def toFactory[K, V, CC[X, Y] <: ParMap[X, Y]](
     parFactory: GenericParMapCompanion[CC]

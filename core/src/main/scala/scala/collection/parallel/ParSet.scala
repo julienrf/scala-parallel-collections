@@ -43,5 +43,5 @@ trait ParSet[T]
 object ParSet extends ParSetFactory[ParSet] {
   def newCombiner[T]: Combiner[T, ParSet[T]] = mutable.ParHashSetCombiner[T]
 
-//  implicit def canBuildFrom[T]: CanCombineFrom[Coll, T, ParSet[T]] = new GenericCanCombineFrom[T]
+  implicit def canBuildFrom[T]: CanCombineFrom[ParSet[_], T, ParSet[T]] = new GenericCanCombineFrom[T]
 }
