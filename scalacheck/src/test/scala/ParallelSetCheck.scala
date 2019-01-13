@@ -9,8 +9,7 @@ import org.scalacheck.Properties
 import scala.collection._
 import scala.collection.parallel._
 
-abstract class ParallelSetCheck[T](collname: String) extends ParallelIterableCheck[T](collname)
-  with SimpleValuesCheck[T] {
+abstract class ParallelSetCheck[T](collname: String) extends ParallelIterableCheck[T](collname) {
 
   type CollType <: ParSet[T]
 

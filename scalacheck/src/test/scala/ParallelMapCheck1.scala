@@ -30,10 +30,10 @@ abstract class ParallelMapCheck[K, V](collname: String) extends ParallelIterable
       (iterable.to(Map), parmap, seq)
     }
 
-  // The following tests have been copied from `SimpleValuesCheck`, and adapted to test
+  // The following tests have been copied from `ParIterableCheck`, and adapted to test
   // overloads of the methods that return Map and ParMap collections
-  property("mappings must be equal") = forAll/*NoShrink*/(collectionPairs) { case (t, coll) =>
-    val results = for ((f, ind) <- mapFunctions.zipWithIndex) yield {
+  property("mappings returning maps must be equal") = forAll/*NoShrink*/(collectionPairs) { case (t, coll) =>
+    val results = for ((f, ind) <- mapFunctions.zipWithIndex.take(5)) yield {
       val ms: Map[K, V] = t.map(f)
       val mp: ParMap[K, V] = coll.map(f)
       val invs = checkDataStructureInvariants(ms, mp)
@@ -53,7 +53,7 @@ abstract class ParallelMapCheck[K, V](collname: String) extends ParallelIterable
     results.reduceLeft(_ && _)
   }
 
-  property("collects must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
+  property("collects returning maps must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
     val results = for ((f, ind) <- partialMapFunctions.zipWithIndex) yield {
       val ps: Map[K, V] = t.collect(f)
       val pp: ParMap[K, V] = coll.collect(f)
@@ -69,12 +69,12 @@ abstract class ParallelMapCheck[K, V](collname: String) extends ParallelIterable
     results.reduceLeft(_ && _)
   }
 
-  property("flatMaps must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
+  property("flatMaps returning maps must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
     (for ((f, ind) <- flatMapFunctions.zipWithIndex)
       yield ("op index: " + ind) |: areEqual(t.flatMap(f), coll.flatMap(f))).reduceLeft(_ && _)
   }
 
-  property("++s must be equal") = forAll(collectionTriplets) { case (t, coll, colltoadd) =>
+  property("++s returning maps must be equal") = forAll(collectionTriplets) { case (t, coll, colltoadd) =>
     try {
       val toadd = colltoadd
       val tr: Map[K, V] = t ++ toadd.iterator

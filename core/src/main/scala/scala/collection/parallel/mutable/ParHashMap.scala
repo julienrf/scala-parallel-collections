@@ -181,7 +181,7 @@ extends scala.collection.parallel.BucketCombiner[(K, V), ParHashMap[K, V], Defau
       buckets(pos) = new UnrolledBuffer[DefaultEntry[K, V]]()
     }
     // add to bucket
-    buckets(pos) += new DefaultEntry[K, V](elem._1, elem._2)
+    buckets(pos) += new DefaultEntry(elem._1, elem._2)
     this
   }
 
@@ -206,9 +206,7 @@ extends scala.collection.parallel.BucketCombiner[(K, V), ParHashMap[K, V], Defau
     var i = 0
     while (i < ParHashMapCombiner.numblocks) {
       if (buckets(i) ne null) {
-        for (elem <- buckets(i)) {
-          table.insertEntry(elem)
-        }
+        for (elem <- buckets(i)) table.insertEntry(elem)
       }
       i += 1
     }

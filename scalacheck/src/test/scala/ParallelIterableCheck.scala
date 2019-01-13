@@ -74,9 +74,10 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
       val am1: Map[Any, Any] = m1.asInstanceOf[Map[Any, Any]]
       val am2: ParMap[Any, Any] = m2.asInstanceOf[ParMap[Any, Any]]
       am1.forall { case (k, v) => am2.get(k).contains(v) } && am2.forall { case (k, v) => am1.get(k).contains(v) }
-    case (i1: Set[T], i2: ParSet[T]) =>
-      i1.forall(i2) && i2.forall(i1)
-    case _ => t1.iterator.sameElements(t2) && t2.sameElements(t1)
+    case _ =>
+      val s1 = t1.toSet
+      val s2 = t2.toSet
+      s1.forall(s2) && s2.forall(s1)
   }
 
   def printDebugInfo[A, CC[X] <: ParIterable[X], C <: ParIterable[A], S <: Iterable[A] with IterableOps[A, Iterable, S]](coll: ParIterableLike[A, CC, C, S]): Unit = {
@@ -159,6 +160,48 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
       ("op index: " + ind) |: ((ft == None && fcoll == None) || (ft != None && fcoll != None))
     }
     results.reduceLeft(_ && _)
+  }
+
+  property("mappings must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
+    val results = for ((f, ind) <- mapFunctions.zipWithIndex) yield {
+      val ms = t.map(f)
+      val mp = coll.map(f)
+      val invs = checkDataStructureInvariants(ms, mp)
+      if (!areEqual(ms, mp) || !invs) {
+        println(t)
+        println(coll)
+        println("mapped to: ")
+        println(ms)
+        println(mp)
+        println("sizes: ")
+        println(ms.size)
+        println(mp.size)
+        println("valid: " + invs)
+      }
+      ("op index: " + ind) |: (areEqual(ms, mp) && invs)
+    }
+    results.reduceLeft(_ && _)
+  }
+
+  property("collects must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
+    val results = for ((f, ind) <- partialMapFunctions.zipWithIndex) yield {
+      val ps = t.collect(f)
+      val pp = coll.collect(f)
+      if (!areEqual(ps, pp)) {
+        println(t)
+        println(coll)
+        println("collected to: ")
+        println(ps)
+        println(pp)
+      }
+      ("op index: " + ind) |: areEqual(ps, pp)
+    }
+    results.reduceLeft(_ && _)
+  }
+
+  property("flatMaps must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
+    (for ((f, ind) <- flatMapFunctions.zipWithIndex)
+      yield ("op index: " + ind) |: areEqual(t.flatMap(f), coll.flatMap(f))).reduceLeft(_ && _)
   }
 
   property("filters must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
@@ -311,6 +354,38 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
     }).reduceLeft(_ && _)
   }
 
+  property("++s must be equal") = forAll(collectionTriplets) { case (t, coll, colltoadd) =>
+    try {
+      val toadd = colltoadd
+      val tr = t ++ toadd.iterator
+      val cr = coll ++ toadd.iterator
+      if (!areEqual(tr, cr)) {
+        println("from: " + t)
+        println("and: " + coll.iterator.toList)
+        println("adding: " + toadd)
+        println(tr.toList)
+        println(cr.iterator.toList)
+      }
+      ("adding " |: areEqual(tr, cr)) &&
+      (for ((trav, ind) <- addAllIterables.zipWithIndex) yield {
+        val tadded = t ++ trav
+        val cadded = coll ++ trav
+        if (!areEqual(tadded, cadded)) {
+          println("----------------------")
+          println("from: " + t)
+          println("and: " + coll)
+          println("adding: " + trav)
+          println(tadded)
+          println(cadded)
+        }
+        ("traversable " + ind) |: areEqual(tadded, cadded)
+      }).reduceLeft(_ && _)
+    } catch {
+      case e: java.lang.Exception =>
+        throw e
+    }
+  }
+
   if (hasStrictOrder) property("copies to array must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
     val tarr = newArray(t.size)
     val collarr = newArray(coll.size)
@@ -359,87 +434,6 @@ abstract class ParallelIterableCheck[T](collName: String) extends Properties(col
         }
         ("operator " + ind) |: areMapsEqual
       }).reduceLeft(_ && _)
-  }
-
-}
-
-/**
-  * Properties for collections whose elements are single values (as opposed to pairs of values)
-  */
-trait SimpleValuesCheck[T] { this: ParallelIterableCheck[T] =>
-
-  property("mappings must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
-    val results = for ((f, ind) <- mapFunctions.zipWithIndex) yield {
-      val ms = t.map(f)
-      val mp = coll.map(f)
-      val invs = checkDataStructureInvariants(ms, mp)
-      if (!areEqual(ms, mp) || !invs) {
-        println(t)
-        println(coll)
-        println("mapped to: ")
-        println(ms)
-        println(mp)
-        println("sizes: ")
-        println(ms.size)
-        println(mp.size)
-        println("valid: " + invs)
-      }
-      ("op index: " + ind) |: (areEqual(ms, mp) && invs)
-    }
-    results.reduceLeft(_ && _)
-  }
-
-  property("collects must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
-    val results = for ((f, ind) <- partialMapFunctions.zipWithIndex) yield {
-      val ps = t.collect(f)
-      val pp = coll.collect(f)
-      if (!areEqual(ps, pp)) {
-        println(t)
-        println(coll)
-        println("collected to: ")
-        println(ps)
-        println(pp)
-      }
-      ("op index: " + ind) |: areEqual(ps, pp)
-    }
-    results.reduceLeft(_ && _)
-  }
-
-  property("flatMaps must be equal") = forAllNoShrink(collectionPairs) { case (t, coll) =>
-    (for ((f, ind) <- flatMapFunctions.zipWithIndex)
-      yield ("op index: " + ind) |: areEqual(t.flatMap(f), coll.flatMap(f))).reduceLeft(_ && _)
-  }
-
-  property("++s must be equal") = forAll(collectionTriplets) { case (t, coll, colltoadd) =>
-    try {
-      val toadd = colltoadd
-      val tr = t ++ toadd.iterator
-      val cr = coll ++ toadd.iterator
-      if (!areEqual(tr, cr)) {
-        println("from: " + t)
-        println("and: " + coll.iterator.toList)
-        println("adding: " + toadd)
-        println(tr.toList)
-        println(cr.iterator.toList)
-      }
-      ("adding " |: areEqual(tr, cr)) &&
-      (for ((trav, ind) <- addAllIterables.zipWithIndex) yield {
-        val tadded = t ++ trav
-        val cadded = coll ++ trav
-        if (!areEqual(tadded, cadded)) {
-          println("----------------------")
-          println("from: " + t)
-          println("and: " + coll)
-          println("adding: " + trav)
-          println(tadded)
-          println(cadded)
-        }
-        ("traversable " + ind) |: areEqual(tadded, cadded)
-      }).reduceLeft(_ && _)
-    } catch {
-      case e: java.lang.Exception =>
-        throw e
-    }
   }
 
 }

@@ -10,7 +10,7 @@ import scala.collection._
 import scala.collection.parallel._
 
 abstract class ParallelSeqCheck[T](collName: String) extends ParallelIterableCheck[T](collName)
-  with SeqOperators[T] with SimpleValuesCheck[T] {
+  with SeqOperators[T] {
 
   type CollType <: collection.parallel.ParSeq[T]
 
